@@ -1,8 +1,37 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Button from '../components/ui/Button';
 import FormInput from '../components/forms/FormInput';
 
-export default function AuthPage({ userType, setUserType, isLogin, setIsLogin }) {
+export default function AuthPage({ userType, setUserType, isLogin, setIsLogin, onNavigate }) {
+  const [form, setForm] = useState({ email: '', password: '' });
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch('http://localhost:5000/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: form.email, password: form.password })
+      });
+      const data = await res.json();
+      if (res.status === 200) {
+        // Store user data in localStorage
+        localStorage.setItem('userEmail', form.email);
+        localStorage.setItem('userData', JSON.stringify(data.user));
+        alert('Login successful');
+        // Navigate to dashboard using React Router
+        window.location.href = '/dashboard';
+      } else {
+        alert(data.message || 'Login failed');
+      }
+    } catch (err) {
+      alert('Server error');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
@@ -49,7 +78,7 @@ export default function AuthPage({ userType, setUserType, isLogin, setIsLogin })
             </Button>
           </div>
 
-          <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+          <form className="space-y-6" onSubmit={userType === 'customer' && isLogin ? handleLogin : (e) => e.preventDefault()}>
             {/* Name Field (Customer signup only) */}
             {userType === 'customer' && !isLogin && (
               <FormInput
@@ -81,6 +110,8 @@ export default function AuthPage({ userType, setUserType, isLogin, setIsLogin })
                 placeholder="Enter your email address"
                 autoComplete="email"
                 required
+                value={form.email}
+                onChange={handleChange}
               />
             )}
 
@@ -103,6 +134,8 @@ export default function AuthPage({ userType, setUserType, isLogin, setIsLogin })
               placeholder="Enter your password"
               autoComplete="current-password"
               required
+              value={form.password}
+              onChange={handleChange}
             />
 
             {/* Confirm Password Field (Customer signup only) */}
