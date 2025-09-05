@@ -4,8 +4,18 @@ import FormInput from '../components/forms/FormInput';
 
 export default function AuthPage({ userType, setUserType, isLogin, setIsLogin, onNavigate }) {
   const [form, setForm] = useState({ email: '', password: '' });
+  const [employeeForm, setEmployeeForm] = useState({ email: '', password: '' });
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleEmployeeChange = (e) => {
+    setEmployeeForm({ ...employeeForm, [e.target.name]: e.target.value });
   };
 
   const handleLogin = async (e) => {
@@ -21,14 +31,61 @@ export default function AuthPage({ userType, setUserType, isLogin, setIsLogin, o
         // Store user data in localStorage
         localStorage.setItem('userEmail', form.email);
         localStorage.setItem('userData', JSON.stringify(data.user));
-        alert('Login successful');
-        // Navigate to dashboard using React Router
-        window.location.href = '/dashboard';
+        
+        // Show success modal
+        setSuccessMessage(`Welcome back, ${data.user.name || 'User'}! Login successful.`);
+        setShowSuccessModal(true);
+        
+        // Navigate to dashboard after a short delay
+        setTimeout(() => {
+          setShowSuccessModal(false);
+          window.location.href = '/dashboard';
+        }, 2000);
       } else {
-        alert(data.message || 'Login failed');
+        setErrorMessage(data.message || 'Login failed. Please check your credentials.');
+        setShowErrorModal(true);
+        setTimeout(() => setShowErrorModal(false), 3000);
       }
     } catch (err) {
-      alert('Server error');
+      setErrorMessage('Server error. Please try again later.');
+      setShowErrorModal(true);
+      setTimeout(() => setShowErrorModal(false), 3000);
+    }
+  };
+
+  const handleEmployeeLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch('http://localhost:5000/admin-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: employeeForm.email, password: employeeForm.password })
+      });
+      const data = await res.json();
+      if (res.status === 200) {
+        // Store admin data in localStorage
+        localStorage.setItem('adminData', JSON.stringify(data.admin));
+        localStorage.setItem('userType', 'employee');
+        
+        // Show success modal
+        setSuccessMessage(`Welcome back, ${data.admin.name || 'Administrator'}! Login successful.`);
+        setShowSuccessModal(true);
+        
+        // Navigate to admin dashboard after a short delay
+        setTimeout(() => {
+          setShowSuccessModal(false);
+          console.log('Redirecting to admin dashboard...');
+          window.location.href = '/admin-dashboard';
+        }, 2000);
+      } else {
+        setErrorMessage(data.message || 'Admin login failed. Please check your credentials.');
+        setShowErrorModal(true);
+        setTimeout(() => setShowErrorModal(false), 3000);
+      }
+    } catch (err) {
+      setErrorMessage('Server error. Please try again later.');
+      setShowErrorModal(true);
+      setTimeout(() => setShowErrorModal(false), 3000);
     }
   };
 
@@ -78,7 +135,7 @@ export default function AuthPage({ userType, setUserType, isLogin, setIsLogin, o
             </Button>
           </div>
 
-          <form className="space-y-6" onSubmit={userType === 'customer' && isLogin ? handleLogin : (e) => e.preventDefault()}>
+          <form className="space-y-6" onSubmit={userType === 'customer' && isLogin ? handleLogin : userType === 'employee' ? handleEmployeeLogin : (e) => e.preventDefault()}>
             {/* Name Field (Customer signup only) */}
             {userType === 'customer' && !isLogin && (
               <FormInput
@@ -90,14 +147,16 @@ export default function AuthPage({ userType, setUserType, isLogin, setIsLogin, o
               />
             )}
 
-            {/* Employee ID Field (Employee login only) */}
+            {/* Employee Email Field (Employee login only) */}
             {userType === 'employee' && (
               <FormInput
-                label="Employee ID"
-                type="text"
-                name="employeeId"
-                placeholder="Enter your employee ID"
+                label="Admin Email"
+                type="email"
+                name="email"
+                placeholder="Enter your admin email"
                 required
+                value={employeeForm.email}
+                onChange={handleEmployeeChange}
               />
             )}
 
@@ -134,8 +193,8 @@ export default function AuthPage({ userType, setUserType, isLogin, setIsLogin, o
               placeholder="Enter your password"
               autoComplete="current-password"
               required
-              value={form.password}
-              onChange={handleChange}
+              value={userType === 'employee' ? employeeForm.password : form.password}
+              onChange={userType === 'employee' ? handleEmployeeChange : handleChange}
             />
 
             {/* Confirm Password Field (Customer signup only) */}
@@ -247,6 +306,62 @@ export default function AuthPage({ userType, setUserType, isLogin, setIsLogin, o
           </div>
         </div>
       </div>
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 transform animate-pulse">
+            <div className="text-center">
+              {/* Success Icon */}
+              <div className="mx-auto flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+                <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              
+              {/* Success Message */}
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Login Successful!</h3>
+              <p className="text-gray-600 mb-6">{successMessage}</p>
+              
+              {/* Loading Animation */}
+              <div className="flex items-center justify-center space-x-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+              </div>
+              <p className="text-sm text-gray-500 mt-2">Redirecting to dashboard...</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Error Modal */}
+      {showErrorModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300">
+            <div className="text-center">
+              {/* Error Icon */}
+              <div className="mx-auto flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
+                <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </div>
+              
+              {/* Error Message */}
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Login Failed</h3>
+              <p className="text-gray-600 mb-6">{errorMessage}</p>
+              
+              {/* Close Button */}
+              <button 
+                onClick={() => setShowErrorModal(false)}
+                className="bg-red-500 text-white px-6 py-2 rounded-lg font-medium hover:bg-red-600 transition-colors"
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -39,7 +39,15 @@ const userSchema = new mongoose.Schema({
   recommendation_tips: String
 }, { strict: false }); // Allow additional fields
 
+const adminSchema = new mongoose.Schema({
+  email: String,
+  password: String,
+  name: String,
+  role: String
+}, { strict: false });
+
 const User = mongoose.model('User', userSchema, collectionName);
+const Admin = mongoose.model('Admin', adminSchema, 'adminlogin'); // using adminlogin collection name
 
 // Debug endpoint to list all users
 app.get('/debug-users', async (req, res) => {
@@ -48,6 +56,16 @@ app.get('/debug-users', async (req, res) => {
     res.json(users);
   } catch (err) {
     res.status(500).json({ message: 'Error fetching users', error: err });
+  }
+});
+
+// Debug endpoint to list all admins
+app.get('/debug-admins', async (req, res) => {
+  try {
+    const admins = await Admin.find({});
+    res.json(admins);
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching admins', error: err });
   }
 });
 
@@ -65,6 +83,44 @@ app.post('/login', async (req, res) => {
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ message: 'Server error', error: err });
+  }
+});
+
+// Admin login endpoint
+app.post('/admin-login', async (req, res) => {
+  const { email, password } = req.body;
+  console.log('Admin login request:', { email, password });
+  try {
+    const admin = await Admin.findOne({ email, password });
+    console.log('Admin query result:', admin);
+    if (admin) {
+      res.status(200).json({ message: 'Admin login successful', admin });
+    } else {
+      res.status(401).json({ message: 'Invalid admin credentials' });
+    }
+  } catch (err) {
+    console.error('Admin login error:', err);
+    res.status(500).json({ message: 'Server error', error: err });
+  }
+});
+
+// Create sample admin endpoint (for testing)
+app.post('/create-admin', async (req, res) => {
+  try {
+    const sampleAdmin = new Admin({
+      employeeId: 'EMP001',
+      name: 'John Smith',
+      email: 'admin@bank.com',
+      password: 'admin123',
+      role: 'admin',
+      department: 'Credit Assessment',
+      access_level: 'high'
+    });
+    
+    const savedAdmin = await sampleAdmin.save();
+    res.status(201).json({ message: 'Sample admin created', admin: savedAdmin });
+  } catch (err) {
+    res.status(500).json({ message: 'Error creating admin', error: err });
   }
 });
 
