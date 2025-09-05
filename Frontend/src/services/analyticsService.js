@@ -73,7 +73,7 @@ class AnalyticsService {
 
 // Mock data fallback (for development without backend)
 const mockAnalyticsData = {
-  totalUsers: 10,
+  totalUsers: 50,
   totalApplications: 10,
   avgCreditScore: 680,
   approvalRate: 50,

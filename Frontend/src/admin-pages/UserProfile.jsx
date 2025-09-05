@@ -68,7 +68,7 @@ const UserProfile = () => {
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">User Not Found</h2>
           <p className="text-gray-600 mb-6">{error}</p>
-          <Button onClick={() => navigate('/applications')} className="bg-blue-600 hover:bg-blue-700">
+          <Button onClick={() => navigate('/admin-dashboard/applications')} className="bg-blue-600 hover:bg-blue-700">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back
           </Button>
@@ -85,7 +85,7 @@ const UserProfile = () => {
           <div className="mb-8">
             <div className="flex items-center justify-between mb-6">
               <Button
-                onClick={() => navigate('/applications')}
+                onClick={() => navigate('/admin-dashboard/applications')}
                 variant="outline"
                 className="hover:bg-gray-50"
               >

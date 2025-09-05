@@ -46,13 +46,17 @@ const Applications = () => {
 
   // Handle status change with database update
   const handleStatusChange = async (applicationId, newStatus) => {
+    // Store the original status for potential revert
+    const originalApplication = applicationsList.find(app => app._id === applicationId);
+    const originalStatus = originalApplication?.status;
+
     try {
       setUpdating(true);
       
       // Update local state immediately for better UX
       setApplicationsList(prevApps => 
         prevApps.map(app => 
-          app.id === applicationId 
+          app._id === applicationId 
             ? { ...app, status: newStatus }
             : app
         )
@@ -67,8 +71,8 @@ const Applications = () => {
         console.warn('Failed to update in database:', apiError.message);
         setApplicationsList(prevApps => 
           prevApps.map(app => 
-            app.id === applicationId 
-              ? { ...app, status: app.status } // This would need the original status
+            app._id === applicationId 
+              ? { ...app, status: originalStatus } // Revert to original status
               : app
           )
         );

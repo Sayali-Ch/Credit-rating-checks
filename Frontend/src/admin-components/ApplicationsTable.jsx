@@ -60,7 +60,7 @@ const ApplicationsTable = ({ applications, onStatusChange }) => {
   };
 
   const handleUserClick = (customerId) => {
-    navigate(`/profile/${customerId}`);
+    navigate(`/admin-dashboard/profile/${customerId}`);
   };
 
   const StatusDropdown = ({ application }) => {
@@ -82,7 +82,7 @@ const ApplicationsTable = ({ applications, onStatusChange }) => {
       <div className="relative">
         <button
           onClick={() => isEditable && setIsOpen(!isOpen)}
-          disabled={updatingStatus === application.id || !isEditable}
+          disabled={updatingStatus === application._id || !isEditable}
           className={`${currentStatusObj.color} font-medium px-3 py-1.5 text-xs rounded-full border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 disabled:opacity-50 flex items-center space-x-2 ${
             isEditable ? 'hover:shadow-sm cursor-pointer' : 'cursor-not-allowed opacity-75'
           }`}
@@ -91,7 +91,7 @@ const ApplicationsTable = ({ applications, onStatusChange }) => {
             currentStatus === 'Approved' ? 'bg-green-600' :
             currentStatus === 'Rejected' ? 'bg-red-600' : 'bg-yellow-600'
           }`}></div>
-          <span>{updatingStatus === application.id ? 'Updating...' : currentStatus}</span>
+          <span>{updatingStatus === application._id ? 'Updating...' : currentStatus}</span>
           {isEditable && (
             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -106,7 +106,7 @@ const ApplicationsTable = ({ applications, onStatusChange }) => {
                 key={status.value}
                 onClick={() => {
                   if (status.value !== currentStatus) {
-                    handleStatusChange(application.id, status.value);
+                    handleStatusChange(application._id, status.value);
                   }
                   setIsOpen(false);
                 }}
@@ -175,7 +175,7 @@ const ApplicationsTable = ({ applications, onStatusChange }) => {
             <TableBody>
               {currentApplications.map((application, index) => (
                 <TableRow 
-                  key={application.id} 
+                  key={application._id} 
                   className="hover:bg-blue-50/50 transition-colors border-gray-50 group"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
