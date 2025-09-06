@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import enhanced admin dashboard styles */
+@import './admin-styles/enhanced-admin.css';
+
 /* Remove all button outlines and focus rings */
 button {
   outline: none !important;

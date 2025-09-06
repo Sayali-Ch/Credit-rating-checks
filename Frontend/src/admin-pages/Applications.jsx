@@ -110,19 +110,21 @@ const Applications = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
-      <main className="max-w-7xl mx-auto py-8 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <main className="max-w-5xl mx-auto py-8 sm:px-6 lg:px-8">
         <div className="px-4 sm:px-0">
           {/* Error Banner */}
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center justify-between">
+            <div className="mb-6 p-4 bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-xl shadow-sm flex items-center justify-between backdrop-blur-sm">
               <div className="flex items-center">
-                <AlertCircle className="w-5 h-5 text-red-600 mr-3" />
-                <span className="text-red-800">{error}</span>
+                <div className="p-2 bg-red-100 rounded-full mr-3">
+                  <AlertCircle className="w-5 h-5 text-red-600" />
+                </div>
+                <span className="text-red-800 font-medium">{error}</span>
               </div>
               <button
                 onClick={() => setError(null)}
-                className="text-red-600 hover:text-red-800"
+                className="text-red-600 hover:text-red-800 hover:bg-red-100 rounded-full p-1 transition-all duration-200"
               >
                 ×
               </button>
@@ -130,28 +132,39 @@ const Applications = () => {
           )}
 
           {/* Page Header */}
-          <div className="mb-10 text-center">
-            <div className="mb-4 flex items-center justify-center space-x-4">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Loan Applications</h1>
-                <p className="mt-2 text-gray-600 text-lg">
-                  Monitor and manage loan applications with real-time status updates
-                </p>
+          <div className="mb-12 flex items-center justify-center">
+            <div className="text-center">
+              <div className="mb-6 flex items-center justify-center space-x-4">
+                <div className="relative max-w-3xl">
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-20"></div>
+                  <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl p-12 shadow-xl border border-white/50">
+                    <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent tracking-tight mb-4">
+                      Loan Applications
+                    </h1>
+                    <p className="text-gray-600 text-xl font-medium leading-relaxed">
+                      Monitor and manage loan applications with real-time status updates
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={fetchApplications}
+                  disabled={updating}
+                  className="group relative overflow-hidden bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 text-white font-semibold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Refresh data"
+                >
+                  <div className="absolute inset-0 bg-white/20 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                  <div className="relative flex items-center space-x-2">
+                    <RefreshCw className={`w-6 h-6 ${updating ? 'animate-spin' : ''}`} />
+                    <span className="text-lg">Refresh</span>
+                  </div>
+                </button>
               </div>
-              <button
-                onClick={fetchApplications}
-                disabled={updating}
-                className="btn-refresh"
-                title="Refresh data"
-              >
-                <RefreshCw className={`w-5 h-5 ${updating ? 'animate-spin' : ''}`} />
-              </button>
+              <div className="h-1 w-40 bg-gradient-to-r from-purple-500 to-blue-600 rounded-full mx-auto shadow-lg"></div>
             </div>
-            <div className="h-1 w-24 rounded-full mx-auto" style={{ backgroundColor: '#8b5cf6' }}></div>
           </div>
 
           {/* Statistics Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
             <DashboardCard
               title="Total Applications"
               value={totalApplications.toLocaleString()}
