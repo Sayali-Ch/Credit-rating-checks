@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import enhanced admin dashboard styles */
+@import './admin-styles/enhanced-admin.css';
+
 /* Remove all button outlines and focus rings */
 button {
   outline: none !important;
@@ -16,6 +19,30 @@ button:focus {
 button:active {
   outline: none !important;
   box-shadow: none !important;
+}
+
+/* Dropdown styles to ensure downward opening */
+select {
+  position: relative;
+  z-index: 10;
+}
+
+/* Ensure select dropdown opens downward */
+.loan-select-container {
+  position: relative;
+  z-index: 1;
+  transform: translateZ(0);
+}
+
+.loan-select-container select {
+  position: relative;
+  z-index: 2;
+}
+
+/* Force dropdown direction downward */
+select option {
+  direction: ltr;
+  text-align: left;
 }
 
 .btn-secondary {
