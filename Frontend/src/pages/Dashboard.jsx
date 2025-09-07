@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import ApplicationService from "../services/applicationService";
 import AuthService from "../services/authService";
 
 function Dashboard() {
+    const navigate = useNavigate();
     const [userData, setUserData] = useState(null);
     const [creditScore, setCreditScore] = useState(null);
     const [creditStatus, setCreditStatus] = useState("");
@@ -299,8 +301,8 @@ function Dashboard() {
     useEffect(() => {
         // Check if user is authenticated
         if (!AuthService.isAuthenticated()) {
-            // Redirect to login if not authenticated
-            window.location.href = '/login';
+            // Redirect to home page (which has AuthPage) if not authenticated
+            navigate('/');
             return;
         }
 

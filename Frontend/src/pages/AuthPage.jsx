@@ -12,8 +12,7 @@ export default function AuthPage({ userType, setUserType, isLogin, setIsLogin, o
     name: '', 
     email: '', 
     password: '', 
-    confirmPassword: '', 
-    phone: '' 
+    confirmPassword: ''
   });
   const [employeeForm, setEmployeeForm] = useState({ email: '', password: '' });
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -57,8 +56,7 @@ export default function AuthPage({ userType, setUserType, isLogin, setIsLogin, o
         body: JSON.stringify({
           name: form.name,
           email: form.email,
-          password: form.password,
-          phone: form.phone
+          password: form.password
         })
       });
 
@@ -67,6 +65,18 @@ export default function AuthPage({ userType, setUserType, isLogin, setIsLogin, o
       if (response.ok) {
         setSuccessMessage(`Account created successfully! Welcome ${form.name}!`);
         setShowSuccessModal(true);
+        
+        // Auto-login the user after successful signup
+        try {
+          const loginResult = await AuthService.login(form.email, form.password, false);
+          if (loginResult.success) {
+            // Store authentication data
+            AuthService.setToken(loginResult.token);
+            AuthService.setUserData(loginResult.user);
+          }
+        } catch (loginError) {
+          console.error('Auto-login after signup failed:', loginError);
+        }
         
         // Redirect to complete profile after delay
         setTimeout(() => {
@@ -233,19 +243,6 @@ export default function AuthPage({ userType, setUserType, isLogin, setIsLogin, o
                 autoComplete="email"
                 required
                 value={form.email}
-                onChange={handleChange}
-              />
-            )}
-
-            {/* Phone Field (Customer signup only) */}
-            {userType === 'customer' && !isLogin && (
-              <FormInput
-                label="Mobile Number"
-                type="tel"
-                name="phone"
-                placeholder="Enter your mobile number"
-                required
-                value={form.phone}
                 onChange={handleChange}
               />
             )}

@@ -19,7 +19,7 @@ const CompleteProfile = () => {
     useEffect(() => {
         // Check if user is authenticated
         if (!AuthService.isAuthenticated()) {
-            navigate('/login');
+            navigate('/');
             return;
         }
 
@@ -37,10 +37,10 @@ const CompleteProfile = () => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         
-        // Special handling for PAN card number
+        // Special handling for customer ID field
         if (name === 'pan_card_number') {
-            // Convert to uppercase and remove any non-alphanumeric characters
-            const cleanValue = value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            // Allow only alphanumeric characters, convert to uppercase
+            const cleanValue = value.replace(/[^A-Z0-9_x]/gi, '').toUpperCase();
             setFormData(prevData => ({
                 ...prevData,
                 [name]: cleanValue
@@ -58,9 +58,10 @@ const CompleteProfile = () => {
         return requiredFields.every(field => formData[field].trim() !== '');
     };
 
-    const validatePAN = (pan) => {
-        const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
-        return panRegex.test(pan);
+    const validatePAN = (customerID) => {
+        // Validate customer ID format: CUS_0x followed by alphanumeric characters
+        const customerIdRegex = /^CUS_0x[A-Z0-9]+$/i;
+        return customerID && customerIdRegex.test(customerID) && customerID.length >= 8;
     };
 
     const handleSubmit = async (e) => {
@@ -77,7 +78,7 @@ const CompleteProfile = () => {
         if (!validatePAN(formData.pan_card_number)) {
             setMessage({
                 type: 'error',
-                text: 'Please enter a valid PAN card number in the format: ABCDE1234F'
+                text: 'Please enter a valid Customer ID in format: CUS_0x followed by alphanumeric characters (e.g., CUS_0x284a)'
             });
             return;
         }
@@ -266,7 +267,7 @@ const CompleteProfile = () => {
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    PAN Card Number <span className="text-red-500">*</span>
+                                    Customer ID <span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="text"
@@ -274,13 +275,12 @@ const CompleteProfile = () => {
                                     value={formData.pan_card_number}
                                     onChange={handleChange}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 uppercase"
-                                    placeholder="ABCDE1234F"
-                                    maxLength="10"
-                                    pattern="[A-Z]{5}[0-9]{4}[A-Z]{1}"
-                                    title="PAN format: 5 letters, 4 digits, 1 letter (e.g., ABCDE1234F)"
+                                    placeholder="CUS_0x284a"
+                                    maxLength="15"
+                                    title="Customer ID format: CUS_0x followed by alphanumeric characters"
                                     required
                                 />
-                                <p className="text-xs text-gray-500 mt-1">Format: 5 letters + 4 digits + 1 letter (e.g., ABCDE1234F)</p>
+                                <p className="text-xs text-gray-500 mt-1">Format: CUS_0x followed by alphanumeric characters (e.g., CUS_0x284a)</p>
                             </div>
                         </div>
 
