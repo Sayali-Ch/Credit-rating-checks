@@ -46,15 +46,14 @@ const Analytics = () => {
   const totalApplications = applications.length;
   
   // Calculate average credit score from applications
-  const avgCreditScore = applications.length > 0 
+  const avgCreditScore = applications.length > 0
     ? Math.round(applications.reduce((sum, app) => sum + app.creditScore, 0) / applications.length)
     : 0;
   
-  // Calculate approval rate
-  const approvedApplications = applications.filter(app => app.status === 'Approved').length;
-  const approvalRate = totalApplications > 0 ? Math.round((approvedApplications / totalApplications) * 100) : 0;
-
-  // Loading state
+  // Calculate eligible and not eligible counts
+  const eligibleApplications = applications.filter(app => app.status === 'Eligible').length;
+  const notEligibleApplications = applications.filter(app => app.status === 'Not Eligible').length;
+  const eligibilityRate = totalApplications > 0 ? Math.round((eligibleApplications / totalApplications) * 100) : 0;  // Loading state
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center">
@@ -128,25 +127,25 @@ const Analytics = () => {
               trend={{ type: 'up', value: '+12%' }}
             />
             <DashboardCard
+              title="Eligible Applications"
+              value={eligibleApplications.toLocaleString()}
+              subtitle={`${eligibilityRate}% eligibility rate`}
+              color="#22c55e"
+              trend={{ type: 'up', value: '+5.2%' }}
+            />
+            <DashboardCard
+              title="Not Eligible Applications"
+              value={notEligibleApplications.toLocaleString()}
+              subtitle={`${100 - eligibilityRate}% rejection rate`}
+              color="#ef4444"
+              trend={{ type: 'down', value: '-3.1%' }}
+            />
+            <DashboardCard
               title="Average Credit Score"
               value={avgCreditScore}
-              subtitle="across all users"
-              color="#22c55e"
-              trend={{ type: 'up', value: '+2.3%' }}
-            />
-            <DashboardCard
-              title="Total Applications"
-              value={totalApplications.toLocaleString()}
-              subtitle={`${applications.filter(app => app.status === 'Under Scrutiny').length} pending review`}
+              subtitle="across all applicants"
               color="#8b5cf6"
-              trend={{ type: 'up', value: '+8.1%' }}
-            />
-            <DashboardCard
-              title="Approval Rate"
-              value={`${approvalRate}%`}
-              subtitle={`${approvedApplications} approved applications`}
-              color="#16a34a"
-              trend={{ type: 'up', value: '+5.2%' }}
+              trend={{ type: 'up', value: '+2.3%' }}
             />
           </div>
 

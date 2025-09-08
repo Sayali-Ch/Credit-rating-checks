@@ -5,6 +5,27 @@ import AuthService from './authService';
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 class ApplicationService {
+  // Loan type credit score requirements
+  static loanRequirements = {
+    'Home Loan': 700,
+    'Car Loan': 650,
+    'Personal Loan': 600,
+    'Education Loan': 580,
+    'Business Loan': 750
+  };
+
+  // Calculate eligibility based on credit score vs required score
+  static calculateEligibility(application) {
+    const requiredScore = this.loanRequirements[application.loanType] || 650;
+    const isEligible = application.creditScore >= requiredScore;
+    
+    return {
+      ...application,
+      requiredScore,
+      status: isEligible ? 'Eligible' : 'Not Eligible'
+    };
+  }
+
   // Fetch all applications from database
   static async getAllApplications() {
     try {
@@ -28,7 +49,10 @@ class ApplicationService {
       const data = await response.json();
       console.log('📊 API Response data length:', data.length);
       console.log('📊 First record:', data[0]);
-      return data;
+      
+      // Apply eligibility calculation to each application
+      const applicationsWithEligibility = data.map(app => this.calculateEligibility(app));
+      return applicationsWithEligibility;
     } catch (error) {
       console.error('Error fetching applications:', error);
       throw error;
@@ -154,21 +178,122 @@ class ApplicationService {
 
 // Mock data fallback (for development without backend)
 const mockApplications = [
-  { id: 1, name: "Alice Williams", creditScore: 720, loanType: "Home Loan", requiredScore: 700, status: "Approved", appliedDate: "2024-09-01", amount: "$450,000" },
-  { id: 2, name: "Liam Smith", creditScore: 640, loanType: "Car Loan", requiredScore: 650, status: "Rejected", appliedDate: "2024-09-02", amount: "$35,000" },
-  { id: 3, name: "Emma Johnson", creditScore: 690, loanType: "Personal Loan", requiredScore: 680, status: "Approved", appliedDate: "2024-09-02", amount: "$25,000" },
-  { id: 4, name: "Noah Brown", creditScore: 560, loanType: "Education Loan", requiredScore: 600, status: "Rejected", appliedDate: "2024-09-01", amount: "$75,000" },
-  { id: 5, name: "Olivia Davis", creditScore: 780, loanType: "Home Loan", requiredScore: 700, status: "Approved", appliedDate: "2024-08-30", amount: "$620,000" },
-  { id: 6, name: "William Wilson", creditScore: 620, loanType: "Personal Loan", requiredScore: 650, status: "Under Scrutiny", appliedDate: "2024-09-03", amount: "$18,000" },
-  { id: 7, name: "Sophia Moore", creditScore: 740, loanType: "Car Loan", requiredScore: 700, status: "Approved", appliedDate: "2024-08-29", amount: "$42,000" },
-  { id: 8, name: "James Taylor", creditScore: 580, loanType: "Education Loan", requiredScore: 600, status: "Under Scrutiny", appliedDate: "2024-08-28", amount: "$85,000" },
-  { id: 9, name: "Isabella Anderson", creditScore: 710, loanType: "Home Loan", requiredScore: 700, status: "Approved", appliedDate: "2024-08-27", amount: "$380,000" },
-  { id: 10, name: "Benjamin Thomas", creditScore: 820, loanType: "Business Loan", requiredScore: 750, status: "Under Scrutiny", appliedDate: "2024-08-26", amount: "$150,000" }
+  { 
+    _id: '1', 
+    customerId: 'CUST001', 
+    name: 'Alice Williams', 
+    loanAmount: 450000,
+    creditScore: 720,
+    loanType: 'Home Loan',
+    submittedAt: '2024-09-01T10:30:00Z',
+    assignedTo: 'Agent Smith',
+    documents: ['id-proof.pdf', 'income-certificate.pdf']
+  },
+  { 
+    _id: '2', 
+    customerId: 'CUST002', 
+    name: 'Liam Smith', 
+    loanAmount: 35000,
+    creditScore: 640,
+    loanType: 'Car Loan',
+    submittedAt: '2024-09-02T14:20:00Z',
+    assignedTo: 'Agent Johnson',
+    documents: ['id-proof.pdf', 'bank-statement.pdf']
+  },
+  { 
+    _id: '3', 
+    customerId: 'CUST003', 
+    name: 'Emma Johnson', 
+    loanAmount: 25000,
+    creditScore: 690,
+    loanType: 'Personal Loan',
+    submittedAt: '2024-09-02T09:15:00Z',
+    assignedTo: 'Agent Brown',
+    documents: ['id-proof.pdf']
+  },
+  { 
+    _id: '4', 
+    customerId: 'CUST004', 
+    name: 'Noah Brown', 
+    loanAmount: 75000,
+    creditScore: 560,
+    loanType: 'Education Loan',
+    submittedAt: '2024-09-01T11:45:00Z',
+    assignedTo: 'Agent Davis',
+    documents: ['id-proof.pdf', 'income-certificate.pdf', 'property-papers.pdf']
+  },
+  { 
+    _id: '5', 
+    customerId: 'CUST005', 
+    name: 'Olivia Davis', 
+    loanAmount: 620000,
+    creditScore: 780,
+    loanType: 'Home Loan',
+    submittedAt: '2024-08-30T16:30:00Z',
+    assignedTo: 'Agent Wilson',
+    documents: ['id-proof.pdf', 'salary-slip.pdf']
+  },
+  { 
+    _id: '6', 
+    customerId: 'CUST006', 
+    name: 'William Wilson', 
+    loanAmount: 18000,
+    creditScore: 620,
+    loanType: 'Personal Loan',
+    submittedAt: '2024-09-03T08:15:00Z',
+    assignedTo: 'Agent Garcia',
+    documents: ['id-proof.pdf', 'employment-letter.pdf']
+  },
+  { 
+    _id: '7', 
+    customerId: 'CUST007', 
+    name: 'Sophia Moore', 
+    loanAmount: 42000,
+    creditScore: 740,
+    loanType: 'Car Loan',
+    submittedAt: '2024-08-29T13:20:00Z',
+    assignedTo: 'Agent Martinez',
+    documents: ['id-proof.pdf', 'vehicle-quote.pdf']
+  },
+  { 
+    _id: '8', 
+    customerId: 'CUST008', 
+    name: 'James Taylor', 
+    loanAmount: 85000,
+    creditScore: 580,
+    loanType: 'Education Loan',
+    submittedAt: '2024-08-28T15:45:00Z',
+    assignedTo: 'Agent Rodriguez',
+    documents: ['id-proof.pdf', 'admission-letter.pdf']
+  },
+  { 
+    _id: '9', 
+    customerId: 'CUST009', 
+    name: 'Isabella Anderson', 
+    loanAmount: 380000,
+    creditScore: 710,
+    loanType: 'Home Loan',
+    submittedAt: '2024-08-27T12:10:00Z',
+    assignedTo: 'Agent Lee',
+    documents: ['id-proof.pdf', 'property-valuation.pdf']
+  },
+  { 
+    _id: '10', 
+    customerId: 'CUST010', 
+    name: 'Benjamin Thomas', 
+    loanAmount: 150000,
+    creditScore: 820,
+    loanType: 'Business Loan',
+    submittedAt: '2024-08-26T09:30:00Z',
+    assignedTo: 'Agent Kim',
+    documents: ['id-proof.pdf', 'business-plan.pdf', 'financial-statements.pdf']
+  }
 ];
 
 // Temporary fallback function for development
 export const getApplicationsFallback = () => {
-  return mockApplications;
+  // Apply eligibility calculation to mock data
+  return mockApplications.map(app => ApplicationService.calculateEligibility(app));
 };
 
 export default ApplicationService;

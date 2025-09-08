@@ -14,7 +14,6 @@ import {
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const ApplicationsTable = ({ applications, onStatusChange }) => {
-  const [updatingStatus, setUpdatingStatus] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const navigate = useNavigate();
@@ -46,85 +45,24 @@ const ApplicationsTable = ({ applications, onStatusChange }) => {
     setCurrentPage(1);
   }, [applications.length]);
 
-  const handleStatusChange = async (applicationId, newStatus) => {
-    setUpdatingStatus(applicationId);
-    try {
-      if (onStatusChange) {
-        await onStatusChange(applicationId, newStatus);
-      }
-    } catch (error) {
-      console.error('Failed to update status:', error);
-    } finally {
-      setUpdatingStatus(null);
-    }
-  };
-
   const handleUserClick = (customerId) => {
     navigate(`/admin-dashboard/profile/${customerId}`);
   };
 
-  const StatusDropdown = ({ application }) => {
-    const [isOpen, setIsOpen] = useState(false);
-    const currentStatus = application.status || 'Under Scrutiny';
+  const StatusCard = ({ application }) => {
+    const currentStatus = application.status || 'Not Eligible';
     
-    const statuses = [
-      { value: 'Under Scrutiny', label: 'Under Scrutiny', color: 'bg-yellow-100 text-yellow-800' },
-      { value: 'Eligible', label: 'Eligible', color: 'bg-green-100 text-green-800' },
-      { value: 'Non-eligible', label: 'Non-eligible', color: 'bg-red-100 text-red-800' }
-    ];
+    const statusConfig = {
+      'Eligible': { color: 'bg-green-100 text-green-800', bgColor: 'bg-green-600' },
+      'Not Eligible': { color: 'bg-red-100 text-red-800', bgColor: 'bg-red-600' }
+    };
 
-    const currentStatusObj = statuses.find(s => s.value === currentStatus) || statuses[0];
+    const config = statusConfig[currentStatus] || statusConfig['Not Eligible'];
     
-    // Disable dropdown if status is not "Under Scrutiny"
-    const isEditable = currentStatus === 'Under Scrutiny';
-
     return (
-      <div className="relative">
-        <button
-          onClick={() => isEditable && setIsOpen(!isOpen)}
-          disabled={updatingStatus === application._id || !isEditable}
-          className={`${currentStatusObj.color} font-bold px-4 py-2 text-xs rounded-full border-0 shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 flex items-center space-x-2 ${
-            isEditable ? 'hover:shadow-xl hover:scale-105 cursor-pointer transform' : 'cursor-not-allowed opacity-75'
-          }`}
-        >
-          <div className={`w-2 h-2 rounded-full shadow-sm ${
-            currentStatus === 'Approved' ? 'bg-green-600' :
-            currentStatus === 'Rejected' ? 'bg-red-600' : 'bg-yellow-600'
-          }`}></div>
-          <span className="font-semibold">
-            {updatingStatus === application._id ? 'Updating...' : currentStatus}
-          </span>
-          {isEditable && (
-            <svg className="w-3 h-3 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          )}
-        </button>
-        
-        {isOpen && isEditable && (
-          <div className="absolute top-full left-0 mt-2 bg-white/95 backdrop-blur-sm border border-gray-200 rounded-xl shadow-2xl z-50 min-w-[160px] overflow-hidden border-t-4 border-t-blue-500">
-            {statuses.map((status) => (
-              <button
-                key={status.value}
-                onClick={() => {
-                  if (status.value !== currentStatus) {
-                    handleStatusChange(application._id, status.value);
-                  }
-                  setIsOpen(false);
-                }}
-                className={`w-full text-left px-4 py-3 text-xs hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-200 flex items-center space-x-3 font-medium ${
-                  status.value === currentStatus ? 'bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-900 font-bold' : 'text-gray-700 bg-white hover:text-gray-900'
-                }`}
-              >
-                <div className={`w-2 h-2 rounded-full shadow-sm ${
-                  status.value === 'Approved' ? 'bg-green-600' :
-                  status.value === 'Rejected' ? 'bg-red-600' : 'bg-yellow-600'
-                }`}></div>
-                <span>{status.label}</span>
-              </button>
-            ))}
-          </div>
-        )}
+      <div className={`${config.color} font-bold px-4 py-2 text-xs rounded-full border-0 shadow-lg inline-flex items-center space-x-2`}>
+        <div className={`w-2 h-2 rounded-full shadow-sm ${config.bgColor}`}></div>
+        <span className="font-semibold">{currentStatus}</span>
       </div>
     );
   };
@@ -287,7 +225,7 @@ const ApplicationsTable = ({ applications, onStatusChange }) => {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <StatusDropdown application={application} />
+                    <StatusCard application={application} />
                   </TableCell>
                 </TableRow>
               ))}

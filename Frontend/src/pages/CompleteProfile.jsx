@@ -11,7 +11,8 @@ const CompleteProfile = () => {
         address: '',
         occupation: '',
         annual_income: '',
-        pan_card_number: ''
+        pan_card_number: '',
+        customer_id: ''
     });
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState(null);
@@ -36,14 +37,14 @@ const CompleteProfile = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        
+
         // Special handling for customer ID field
         if (name === 'pan_card_number') {
             // Allow only alphanumeric characters, convert to uppercase
-            const cleanValue = value.replace(/[^A-Z0-9_x]/gi, '').toUpperCase();
-            setFormData(prevData => ({
+            const cleanValue = value.replace(/[^A-Z0-9_x]/gi, ''); setFormData(prevData => ({
                 ...prevData,
-                [name]: cleanValue
+                [name]: cleanValue,
+                customer_id: cleanValue
             }));
         } else {
             setFormData(prevData => ({
@@ -66,69 +67,64 @@ const CompleteProfile = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
-        if (!validateForm()) {
-            setMessage({
-                type: 'error',
-                text: 'Please fill in all required fields.'
-            });
-            return;
-        }
-
-        if (!validatePAN(formData.pan_card_number)) {
-            setMessage({
-                type: 'error',
-                text: 'Please enter a valid Customer ID in format: CUS_0x followed by alphanumeric characters (e.g., CUS_0x284a)'
-            });
-            return;
-        }
+        setLoading(true);
+        setMessage(null);
 
         try {
-            setLoading(true);
-            setMessage(null);
-
-            // Get customer ID from JWT token
-            const userData = AuthService.getUserFromToken();
-            if (!userData) {
-                throw new Error('Authentication required. Please login again.');
-            }
-
-            // Submit profile data to backend
             const response = await fetch('http://localhost:5000/api/complete-profile', {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${AuthService.getToken()}`,
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${AuthService.getToken()}`
                 },
-                body: JSON.stringify({
-                    customer_id: userData.customerId,
-                    ...formData,
-                    annual_income: parseInt(formData.annual_income)
-                })
+                body: JSON.stringify(formData)
             });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Failed to save profile');
-            }
 
             const result = await response.json();
-            
-            setMessage({
-                type: 'success',
-                text: 'Profile completed successfully! Redirecting to dashboard...'
-            });
 
-            // Redirect to dashboard after 2 seconds
-            setTimeout(() => {
-                navigate('/dashboard');
-            }, 2000);
+            if (response.ok) {
+                // Generate a new token with the updated customer_id
+                const updatedUser = {
+                    ...AuthService.getUserFromToken(),
+                    customer_id: formData.customer_id
+                };
 
+                const tokenResponse = await fetch('http://localhost:5000/api/regenerate-token', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${AuthService.getToken()}`},
+                    body: JSON.stringify(updatedUser)
+                });
+
+                const tokenResult = await tokenResponse.json();
+
+                if (tokenResponse.ok) {
+                    AuthService.setToken(tokenResult.token);
+                    AuthService.setUserData(updatedUser);
+
+                    setMessage({
+                        type: 'success',
+                        text: 'Profile updated successfully! Redirecting...'
+                    });
+
+                    setTimeout(() => navigate('/dashboard'), 2000);
+                } else {
+                    setMessage({
+                        type: 'error',
+                        text: tokenResult.message || 'Failed to regenerate token.'
+                    });
+                }
+            } else {
+                setMessage({
+                    type: 'error',
+                    text: result.message || 'Profile update failed.'
+                });
+            }
         } catch (error) {
-            console.error('Profile completion error:', error);
+            console.error('Profile update error:', error);
             setMessage({
                 type: 'error',
-                text: error.message || 'Failed to save profile. Please try again.'
+                text: 'Network error. Please try again.'
             });
         } finally {
             setLoading(false);
@@ -150,11 +146,10 @@ const CompleteProfile = () => {
                     </div>
 
                     {message && (
-                        <div className={`rounded-lg p-4 mb-6 ${
-                            message.type === 'success' 
-                                ? 'bg-green-50 border border-green-200 text-green-800' 
+                        <div className={`rounded-lg p-4 mb-6 ${message.type === 'success'
+                                ? 'bg-green-50 border border-green-200 text-green-800'
                                 : 'bg-red-50 border border-red-200 text-red-800'
-                        }`}>
+                            }`}>
                             <div className="flex items-center">
                                 {message.type === 'success' ? (
                                     <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -274,7 +269,7 @@ const CompleteProfile = () => {
                                     name="pan_card_number"
                                     value={formData.pan_card_number}
                                     onChange={handleChange}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 uppercase"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     placeholder="CUS_0x284a"
                                     maxLength="15"
                                     title="Customer ID format: CUS_0x followed by alphanumeric characters"

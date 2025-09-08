@@ -14,6 +14,7 @@ function Dashboard() {
     const [showParameterForm, setShowParameterForm] = useState(false);
     const [loanParameters, setLoanParameters] = useState({});
     const [parameterFormValid, setParameterFormValid] = useState(false);
+    const [loanAmount, setLoanAmount] = useState('');
 
     // Define loan eligibility criteria
     const loanCriteria = {
@@ -53,54 +54,68 @@ function Dashboard() {
                 { name: "jobDuration", label: "Current Job Duration (months)", type: "number", required: true, min: 6, placeholder: "Months in current job" },
                 { name: "vehicleModel", label: "Vehicle Model", type: "text", required: true, placeholder: "e.g., Honda City, Toyota Corolla" },
                 { name: "vehiclePrice", label: "Vehicle Price (₹)", type: "number", required: true, min: 100000, placeholder: "Expected vehicle price" },
-                { name: "hasRegistrationPapers", label: "Registration Papers", type: "select", required: true, options: [
-                    { value: "yes", label: "Yes, I have all registration papers" },
-                    { value: "pending", label: "Pending - Will arrange" },
-                    { value: "new-vehicle", label: "New vehicle purchase" }
-                ]}
+                {
+                    name: "hasRegistrationPapers", label: "Registration Papers", type: "select", required: true, options: [
+                        { value: "yes", label: "Yes, I have all registration papers" },
+                        { value: "pending", label: "Pending - Will arrange" },
+                        { value: "new-vehicle", label: "New vehicle purchase" }
+                    ]
+                }
             ]
         },
         "personal-loan": {
             fields: [
                 { name: "existingDebts", label: "Existing Debts/EMIs (₹/month)", type: "number", required: true, min: 0, placeholder: "Total monthly EMI obligations" },
-                { name: "employmentType", label: "Employment Type", type: "select", required: true, options: [
-                    { value: "salaried", label: "Salaried Employee" },
-                    { value: "self-employed", label: "Self Employed" },
-                    { value: "business", label: "Business Owner" },
-                    { value: "professional", label: "Professional (Doctor/CA/Lawyer)" }
-                ]},
-                { name: "residencyStatus", label: "Residency Status", type: "select", required: true, options: [
-                    { value: "owned", label: "Own House" },
-                    { value: "rented", label: "Rented" },
-                    { value: "family", label: "Family Owned" },
-                    { value: "company", label: "Company Provided" }
-                ]},
-                { name: "addressProof", label: "Address Proof Available", type: "select", required: true, options: [
-                    { value: "yes", label: "Yes, I have valid address proof" },
-                    { value: "partial", label: "Some documents available" },
-                    { value: "no", label: "Need to arrange" }
-                ]}
+                {
+                    name: "employmentType", label: "Employment Type", type: "select", required: true, options: [
+                        { value: "salaried", label: "Salaried Employee" },
+                        { value: "self-employed", label: "Self Employed" },
+                        { value: "business", label: "Business Owner" },
+                        { value: "professional", label: "Professional (Doctor/CA/Lawyer)" }
+                    ]
+                },
+                {
+                    name: "residencyStatus", label: "Residency Status", type: "select", required: true, options: [
+                        { value: "owned", label: "Own House" },
+                        { value: "rented", label: "Rented" },
+                        { value: "family", label: "Family Owned" },
+                        { value: "company", label: "Company Provided" }
+                    ]
+                },
+                {
+                    name: "addressProof", label: "Address Proof Available", type: "select", required: true, options: [
+                        { value: "yes", label: "Yes, I have valid address proof" },
+                        { value: "partial", label: "Some documents available" },
+                        { value: "no", label: "Need to arrange" }
+                    ]
+                }
             ]
         },
         "home-loan": {
             fields: [
-                { name: "propertyOwnership", label: "Property Ownership Status", type: "select", required: true, options: [
-                    { value: "identified", label: "Property Identified" },
-                    { value: "booked", label: "Property Booked" },
-                    { value: "registered", label: "Property Registered" },
-                    { value: "searching", label: "Still Searching" }
-                ]},
-                { name: "titleDocuments", label: "Title Documents Status", type: "select", required: true, options: [
-                    { value: "clear", label: "Clear title documents available" },
-                    { value: "pending", label: "Under verification" },
-                    { value: "issues", label: "Some issues to resolve" },
-                    { value: "na", label: "Not applicable yet" }
-                ]},
-                { name: "legalClearance", label: "Legal Clearances", type: "select", required: true, options: [
-                    { value: "approved", label: "All approvals in place" },
-                    { value: "pending", label: "Some approvals pending" },
-                    { value: "na", label: "Will be arranged" }
-                ]},
+                {
+                    name: "propertyOwnership", label: "Property Ownership Status", type: "select", required: true, options: [
+                        { value: "identified", label: "Property Identified" },
+                        { value: "booked", label: "Property Booked" },
+                        { value: "registered", label: "Property Registered" },
+                        { value: "searching", label: "Still Searching" }
+                    ]
+                },
+                {
+                    name: "titleDocuments", label: "Title Documents Status", type: "select", required: true, options: [
+                        { value: "clear", label: "Clear title documents available" },
+                        { value: "pending", label: "Under verification" },
+                        { value: "issues", label: "Some issues to resolve" },
+                        { value: "na", label: "Not applicable yet" }
+                    ]
+                },
+                {
+                    name: "legalClearance", label: "Legal Clearances", type: "select", required: true, options: [
+                        { value: "approved", label: "All approvals in place" },
+                        { value: "pending", label: "Some approvals pending" },
+                        { value: "na", label: "Will be arranged" }
+                    ]
+                },
                 { name: "propertyValue", label: "Property Value (₹)", type: "number", required: true, min: 1000000, placeholder: "Estimated property value" },
                 { name: "loanAmount", label: "Required Loan Amount (₹)", type: "number", required: true, min: 500000, placeholder: "Loan amount needed" }
             ]
@@ -108,81 +123,109 @@ function Dashboard() {
         "business-loan": {
             fields: [
                 { name: "gstNumber", label: "GST Registration Number", type: "text", required: true, placeholder: "Enter GST number" },
-                { name: "msmeRegistration", label: "MSME Registration", type: "select", required: true, options: [
-                    { value: "registered", label: "MSME Registered" },
-                    { value: "applied", label: "Application Submitted" },
-                    { value: "not-applicable", label: "Not Applicable" },
-                    { value: "will-apply", label: "Will Apply" }
-                ]},
+                {
+                    name: "msmeRegistration", label: "MSME Registration", type: "select", required: true, options: [
+                        { value: "registered", label: "MSME Registered" },
+                        { value: "applied", label: "Application Submitted" },
+                        { value: "not-applicable", label: "Not Applicable" },
+                        { value: "will-apply", label: "Will Apply" }
+                    ]
+                },
                 { name: "businessYears", label: "Years in Business", type: "number", required: true, min: 1, placeholder: "Number of years in operation" },
-                { name: "businessType", label: "Business Type", type: "select", required: true, options: [
-                    { value: "manufacturing", label: "Manufacturing" },
-                    { value: "trading", label: "Trading" },
-                    { value: "services", label: "Services" },
-                    { value: "retail", label: "Retail" },
-                    { value: "other", label: "Other" }
-                ]},
-                { name: "hasProjectPlan", label: "Business/Project Plan", type: "select", required: true, options: [
-                    { value: "detailed", label: "Detailed project plan ready" },
-                    { value: "basic", label: "Basic plan available" },
-                    { value: "will-prepare", label: "Will prepare with bank guidance" }
-                ]},
-                { name: "cashFlowProjection", label: "Cash Flow Projections", type: "select", required: true, options: [
-                    { value: "available", label: "12-month projections ready" },
-                    { value: "partial", label: "6-month projections available" },
-                    { value: "need-help", label: "Need assistance in preparation" }
-                ]}
+                {
+                    name: "businessType", label: "Business Type", type: "select", required: true, options: [
+                        { value: "manufacturing", label: "Manufacturing" },
+                        { value: "trading", label: "Trading" },
+                        { value: "services", label: "Services" },
+                        { value: "retail", label: "Retail" },
+                        { value: "other", label: "Other" }
+                    ]
+                },
+                {
+                    name: "hasProjectPlan", label: "Business/Project Plan", type: "select", required: true, options: [
+                        { value: "detailed", label: "Detailed project plan ready" },
+                        { value: "basic", label: "Basic plan available" },
+                        { value: "will-prepare", label: "Will prepare with bank guidance" }
+                    ]
+                },
+                {
+                    name: "cashFlowProjection", label: "Cash Flow Projections", type: "select", required: true, options: [
+                        { value: "available", label: "12-month projections ready" },
+                        { value: "partial", label: "6-month projections available" },
+                        { value: "need-help", label: "Need assistance in preparation" }
+                    ]
+                }
             ]
         },
         "education-loan": {
             fields: [
-                { name: "admissionStatus", label: "Admission Status", type: "select", required: true, options: [
-                    { value: "confirmed", label: "Admission Confirmed" },
-                    { value: "provisional", label: "Provisional Admission" },
-                    { value: "applied", label: "Applied - Awaiting Result" },
-                    { value: "planning", label: "Planning to Apply" }
-                ]},
-                { name: "feeStructure", label: "Fee Structure Clarity", type: "select", required: true, options: [
-                    { value: "complete", label: "Complete fee structure available" },
-                    { value: "partial", label: "Partial information available" },
-                    { value: "estimated", label: "Estimated fees only" }
-                ]},
-                { name: "coApplicant", label: "Co-applicant Details", type: "select", required: true, options: [
-                    { value: "parent", label: "Parent as Co-applicant" },
-                    { value: "guardian", label: "Guardian as Co-applicant" },
-                    { value: "spouse", label: "Spouse as Co-applicant" },
-                    { value: "other", label: "Other Family Member" }
-                ]},
+                {
+                    name: "admissionStatus", label: "Admission Status", type: "select", required: true, options: [
+                        { value: "confirmed", label: "Admission Confirmed" },
+                        { value: "provisional", label: "Provisional Admission" },
+                        { value: "applied", label: "Applied - Awaiting Result" },
+                        { value: "planning", label: "Planning to Apply" }
+                    ]
+                },
+                {
+                    name: "feeStructure", label: "Fee Structure Clarity", type: "select", required: true, options: [
+                        { value: "complete", label: "Complete fee structure available" },
+                        { value: "partial", label: "Partial information available" },
+                        { value: "estimated", label: "Estimated fees only" }
+                    ]
+                },
+                {
+                    name: "coApplicant", label: "Co-applicant Details", type: "select", required: true, options: [
+                        { value: "parent", label: "Parent as Co-applicant" },
+                        { value: "guardian", label: "Guardian as Co-applicant" },
+                        { value: "spouse", label: "Spouse as Co-applicant" },
+                        { value: "other", label: "Other Family Member" }
+                    ]
+                },
                 { name: "courseDuration", label: "Course Duration (years)", type: "number", required: true, min: 1, max: 10, placeholder: "Duration of the course" },
-                { name: "courseType", label: "Course Type", type: "select", required: true, options: [
-                    { value: "engineering", label: "Engineering/Technical" },
-                    { value: "medical", label: "Medical" },
-                    { value: "management", label: "Management (MBA/PGDM)" },
-                    { value: "foreign", label: "Foreign Studies" },
-                    { value: "other", label: "Other Professional Course" }
-                ]},
-                { name: "employmentProspects", label: "Employment Prospects", type: "select", required: true, options: [
-                    { value: "excellent", label: "Excellent (High-demand field)" },
-                    { value: "good", label: "Good (Stable career prospects)" },
-                    { value: "average", label: "Average" },
-                    { value: "uncertain", label: "Uncertain" }
-                ]}
+                {
+                    name: "courseType", label: "Course Type", type: "select", required: true, options: [
+                        { value: "engineering", label: "Engineering/Technical" },
+                        { value: "medical", label: "Medical" },
+                        { value: "management", label: "Management (MBA/PGDM)" },
+                        { value: "foreign", label: "Foreign Studies" },
+                        { value: "other", label: "Other Professional Course" }
+                    ]
+                },
+                {
+                    name: "employmentProspects", label: "Employment Prospects", type: "select", required: true, options: [
+                        { value: "excellent", label: "Excellent (High-demand field)" },
+                        { value: "good", label: "Good (Stable career prospects)" },
+                        { value: "average", label: "Average" },
+                        { value: "uncertain", label: "Uncertain" }
+                    ]
+                }
             ]
         }
     };
 
     const checkEligibility = (loanType) => {
         if (!loanType || !creditScore) return;
-        
+
         const criteria = loanCriteria[loanType];
         const isEligible = creditScore >= criteria.minCreditScore;
-        
+
         setEligibilityResult({
             loanType: criteria.name,
             isEligible,
             minRequired: criteria.minCreditScore,
             currentScore: creditScore,
             description: criteria.description
+        });
+    };
+
+    const submitApplication = (loanType, amount) => {
+        setEligibilityResult({
+            loanType: loanCriteria[loanType].name,
+            isEligible: true,
+            amount: amount,
+            description: "Your application is being submitted",
+            isSubmission: true
         });
     };
 
@@ -193,7 +236,8 @@ function Dashboard() {
         setLoanParameters({});
         setEligibilityResult(null);
         setParameterFormValid(false);
-        
+        setLoanAmount('');
+
         if (loanType) {
             setShowParameterForm(true);
         }
@@ -205,7 +249,7 @@ function Dashboard() {
             [fieldName]: value
         };
         setLoanParameters(newParameters);
-        
+
         // Validate form completeness
         if (selectedLoanType && loanParameterRequirements[selectedLoanType]) {
             const requiredFields = loanParameterRequirements[selectedLoanType].fields.filter(field => field.required);
@@ -219,8 +263,8 @@ function Dashboard() {
 
     const handleParameterFormSubmit = (e) => {
         e.preventDefault();
-        if (parameterFormValid && selectedLoanType) {
-            checkEligibility(selectedLoanType);
+        if (parameterFormValid && selectedLoanType && loanAmount) {
+            submitApplication(selectedLoanType, loanAmount);
         }
     };
 
@@ -228,7 +272,7 @@ function Dashboard() {
         if (!selectedLoanType || !loanParameterRequirements[selectedLoanType]) return null;
 
         const requirements = loanParameterRequirements[selectedLoanType];
-        
+
         return (
             <div className="bg-blue-50 rounded-lg p-6 mb-6">
                 <div className="flex items-center mb-4">
@@ -239,7 +283,7 @@ function Dashboard() {
                         Additional Information Required for {loanCriteria[selectedLoanType].name}
                     </h3>
                 </div>
-                
+
                 <form onSubmit={handleParameterFormSubmit} className="space-y-4">
                     {requirements.fields.map((field) => (
                         <div key={field.name} className="space-y-2">
@@ -247,7 +291,7 @@ function Dashboard() {
                                 {field.label}
                                 {field.required && <span className="text-red-500 ml-1">*</span>}
                             </label>
-                            
+
                             {field.type === 'select' ? (
                                 <select
                                     value={loanParameters[field.name] || ''}
@@ -276,7 +320,7 @@ function Dashboard() {
                             )}
                         </div>
                     ))}
-                    
+
                     <div className="flex items-center justify-between pt-4 border-t border-blue-200">
                         <div className="text-sm text-blue-600">
                             Please fill all required fields to proceed with eligibility check
@@ -284,13 +328,12 @@ function Dashboard() {
                         <button
                             type="submit"
                             disabled={!parameterFormValid}
-                            className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-                                parameterFormValid
-                                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                            }`}
+                            className={`px-6 py-2 rounded-lg font-medium transition-colors ${parameterFormValid
+                                ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                }`}
                         >
-                            Check Eligibility
+                            Apply
                         </button>
                     </div>
                 </form>
@@ -298,60 +341,75 @@ function Dashboard() {
         );
     };
 
+
+
     useEffect(() => {
-        // Check if user is authenticated
+        const fetchAndUpdateCreditScore = async (token) => {
+            try {
+                // Step 1: Always fetch from ML backend
+                const mlResponse = await fetch('http://localhost:5000/api/credit-score', {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
+                if (!mlResponse.ok) throw new Error("Failed to fetch credit score from ML backend");
+
+                const mlData = await mlResponse.json();
+                const mlScore = mlData.credit_score || mlData.Credit_Score;
+
+                // Step 2: Update local state with fresh score
+                setCreditScore(mlScore);
+                if (mlScore >= 750) setCreditStatus("Excellent");
+                else if (mlScore >= 700) setCreditStatus("Good");
+                else if (mlScore >= 650) setCreditStatus("Fair");
+                else setCreditStatus("Poor");
+
+                // Step 3: Save updated ML data to user details in database
+                await fetch('http://localhost:5000/api/save-credit-score', {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(mlData) // Always overwrite with new data
+                });
+
+            } catch (error) {
+                console.error('Error updating credit score:', error);
+                setCreditScore(750); // Fallback default
+                setCreditStatus("Good");
+            }
+        };
+
+        // Main logic
         if (!AuthService.isAuthenticated()) {
-            // Redirect to home page (which has AuthPage) if not authenticated
             navigate('/');
             return;
         }
 
-        // Get user data from JWT token first
         const tokenUser = AuthService.getUserFromToken();
         if (tokenUser) {
             setUserData(tokenUser);
-            // Try to get additional user data from server
-            AuthService.getUserProfile()
-                .then(serverUser => {
-                    setUserData(serverUser);
-                    setCreditScore(serverUser.credit_score || serverUser.Credit_Score);
-                    
-                    // Set credit status based on score
-                    const score = serverUser.credit_score || serverUser.Credit_Score;
-                    if (score >= 750) setCreditStatus("Excellent");
-                    else if (score >= 700) setCreditStatus("Good");
-                    else if (score >= 650) setCreditStatus("Fair");
-                    else setCreditStatus("Poor");
-                })
-                .catch(error => {
-                    console.error('Error fetching user profile:', error);
-                    // Use token data as fallback
-                    setCreditScore(750); // Default for demo
-                    setCreditStatus("Good");
-                })
-                .finally(() => setLoading(false));
+            const token = AuthService.getToken();
+            if (token) fetchAndUpdateCreditScore(token);
         } else {
-            // Fallback to localStorage (legacy support)
+            // Fallback to localStorage (only for user details, not score fetching)
             const storedUserData = localStorage.getItem('userData');
             if (storedUserData) {
                 try {
                     const user = JSON.parse(storedUserData);
                     setUserData(user);
-                    setCreditScore(user.credit_score || user.Credit_Score);
-                    
-                    // Set credit status based on score
-                    const score = user.credit_score || user.Credit_Score;
-                    if (score >= 750) setCreditStatus("Excellent");
-                    else if (score >= 700) setCreditStatus("Good");
-                    else if (score >= 650) setCreditStatus("Fair");
-                    else setCreditStatus("Poor");
                 } catch (error) {
                     console.error('Error parsing user data:', error);
                 }
             }
-            setLoading(false);
         }
+
+        setLoading(false);
     }, []);
+
 
     // Show loading state
     if (loading) {
@@ -442,7 +500,7 @@ function Dashboard() {
                         <svg className="w-6 h-6 text-purple-500 mr-2" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 17v-2a4 4 0 0 1 4-4h2m6 6h6a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2z" /></svg>
                         <h2 className="text-2xl font-bold text-gray-800">Customer Credit Summary</h2>
                     </div>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {/* Tip 1 */}
                         <div className="border rounded-xl p-6 bg-white flex flex-col justify-between">
@@ -453,7 +511,7 @@ function Dashboard() {
                             <p className="text-gray-500 mb-4">
                                 {userData?.positive_summary || "Payment history is the most important factor in your credit score."}
                             </p>
-                            
+
                         </div>
                         {/* Tip 2 */}
                         <div className="border rounded-xl p-6 bg-white flex flex-col justify-between">
@@ -464,7 +522,7 @@ function Dashboard() {
                             <p className="text-gray-500 mb-4">
                                 {userData?.negative_summary || "Try to use less than 30% of your available credit limit."}
                             </p>
-                    
+
                         </div>
                         {/* Tip 3 */}
                         <div className="border rounded-xl p-6 bg-white flex flex-col justify-between">
@@ -475,7 +533,7 @@ function Dashboard() {
                             <p className="text-gray-500 mb-4">
                                 {userData?.recommendation_tips || "Review your credit report regularly for errors and discrepancies."}
                             </p>
-                    
+
                         </div>
                     </div>
                 </div>
@@ -488,7 +546,7 @@ function Dashboard() {
                         </svg>
                         <h2 className="text-2xl font-bold text-gray-800">Loan Eligibility</h2>
                     </div>
-                    
+
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 min-h-[400px]">
                         {/* Loan Type Selection */}
                         <div className="space-y-4">
@@ -500,7 +558,7 @@ function Dashboard() {
                                     value={selectedLoanType}
                                     onChange={handleLoanTypeChange}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700 bg-white appearance-none"
-                                    style={{ 
+                                    style={{
                                         backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
                                         backgroundPosition: 'right 0.5rem center',
                                         backgroundRepeat: 'no-repeat',
@@ -516,6 +574,27 @@ function Dashboard() {
                                     <option value="home-loan">Home Loan</option>
                                 </select>
                             </div>
+
+                            {/* Loan Amount Input */}
+                            {selectedLoanType && (
+                                <div className="mt-4">
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        How much loan amount are you requesting?
+                                    </label>
+                                    <div className="relative">
+                                        <span className="absolute left-3 top-3 text-gray-500">₹</span>
+                                        <input
+                                            type="number"
+                                            value={loanAmount}
+                                            onChange={(e) => setLoanAmount(e.target.value)}
+                                            placeholder="Enter loan amount"
+                                            className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            min="1000"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Parameter Input Form */}
                             {showParameterForm && renderParameterForm()}
@@ -542,7 +621,7 @@ function Dashboard() {
                             )}
                         </div>
 
-                        {/* Eligibility Result */}
+                        {/* Eligibility Result                         
                         {applicationMessage && (
                             <div className={`rounded-lg p-4 border ${applicationMessage.type === 'success' ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'} mb-4`}>
                                 <div className="flex items-center">
@@ -560,9 +639,40 @@ function Dashboard() {
                                     </p>
                                 </div>
                             </div>
+                        )} */}
+
+
+                        {eligibilityResult && eligibilityResult.isSubmission && (
+                            <div className="rounded-lg p-6 border-2 border-blue-200 bg-blue-50">
+                                <div className="flex items-center mb-4">
+                                    <svg className="w-8 h-8 text-blue-600 mr-3" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <div>
+                                        <h3 className="text-xl font-bold text-blue-800">
+                                            Application Being Submitted
+                                        </h3>
+                                        <p className="text-sm text-blue-600">
+                                            {eligibilityResult.loanType}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-3">
+                                    <div className="flex items-center text-sm text-blue-700">
+                                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                        Loan Amount: ₹{eligibilityResult.amount}
+                                    </div>
+                                    <div className="w-full bg-blue-100 border border-blue-300 text-blue-800 font-semibold py-3 px-6 rounded-lg text-center">
+                                        📋 Your application is being submitted for processing
+                                    </div>
+                                </div>
+                            </div>
                         )}
 
-                        {eligibilityResult && (
+                        {eligibilityResult && !eligibilityResult.isSubmission && (
                             <div className={`rounded-lg p-6 border-2 ${eligibilityResult.isEligible ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
                                 <div className="flex items-center mb-4">
                                     {eligibilityResult.isEligible ? (
@@ -583,7 +693,7 @@ function Dashboard() {
                                         </p>
                                     </div>
                                 </div>
-                                
+
                                 <p className={`mb-4 ${eligibilityResult.isEligible ? 'text-green-700' : 'text-red-700'}`}>
                                     {eligibilityResult.description}
                                 </p>

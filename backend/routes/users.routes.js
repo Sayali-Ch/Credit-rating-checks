@@ -1,13 +1,14 @@
 const router = require('express').Router();
 const authenticateToken = require('../middleware/auth');
-const { getProfile, checkProfile, completeProfile, updateUserBasic } = require('../controllers/userController');
+const { signup, login, adminLogin, validateToken, regenerateToken } = require('../controllers/authController');
 
-// Profile from user_details
-router.get('/api/profile', authenticateToken, getProfile);
-router.get('/api/check-profile/:customerId', authenticateToken, checkProfile);
-router.post('/api/complete-profile', authenticateToken, completeProfile);
+// Existing routes
+router.post('/api/signup', signup);
+router.post('/login', login);
+router.post('/admin-login', adminLogin);
+router.get('/api/validate-token', authenticateToken, validateToken);
 
-// Optional basic user doc update
-router.put('/api/users/basic', authenticateToken, updateUserBasic);
+// New regenerate token route
+router.post('/api/regenerate-token', authenticateToken, regenerateToken);
 
 module.exports = router;

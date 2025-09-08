@@ -84,6 +84,7 @@ function App() {
           
           {/* Customer Routes */}
           <Route path="/dashboard" element={<Home />} />
+          <Route path="/home" element={<Home />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/complete-profile" element={<CompleteProfile />} />
           

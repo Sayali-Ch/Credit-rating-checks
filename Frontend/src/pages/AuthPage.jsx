@@ -106,10 +106,10 @@ export default function AuthPage({ userType, setUserType, isLogin, setIsLogin, o
         setSuccessMessage(`Welcome back, ${result.user.name || 'User'}! Login successful.`);
         setShowSuccessModal(true);
         
-        // For login, always redirect to dashboard after delay
+        // For login, always redirect to home page after delay
         setTimeout(() => {
           setShowSuccessModal(false);
-          navigate('/dashboard');
+          navigate('/home');
         }, 2000);
       } else {
         setErrorMessage(result.message || 'Login failed. Please check your credentials.');

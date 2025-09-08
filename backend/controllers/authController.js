@@ -121,3 +121,38 @@ exports.adminLogin = async (req, res, next) => {
 exports.validateToken = async (req, res) => {
   res.json({ valid: true, user: req.user, message: 'Token is valid' });
 };
+
+// POST /api/regenerate-token
+exports.regenerateToken = async (req, res, next) => {
+  try {
+    // Get existing user data from token
+    const userFromToken = req.user;
+    if (!userFromToken?.email) {
+      return res.status(400).json({ message: 'Invalid token: missing user data' });
+    }
+
+    // Fetch the latest user details from DB (in case customer_id changed)
+    const user = await User.findOne({ email: userFromToken.email });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Generate a new token with updated data
+    const role = user.isadmin?.toLowerCase() === 'yes' ? 'admin' : 'customer';
+    const token = generateToken({
+      customerId: user.customer_id,
+      email: user.email,
+      name: user.name,
+      role
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Token regenerated successfully',
+      token
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+

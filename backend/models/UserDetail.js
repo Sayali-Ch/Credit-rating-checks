@@ -29,7 +29,8 @@ const userDetailSchema = new mongoose.Schema({
   
 }, { 
   collection: 'user_details',
-  timestamps: true 
+  timestamps: true,
+  strict: false
 });
 
 module.exports = mongoose.model('UserDetail', userDetailSchema);

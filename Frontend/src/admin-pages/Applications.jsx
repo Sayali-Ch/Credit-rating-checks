@@ -90,11 +90,10 @@ const Applications = () => {
 
   // Calculate statistics
   const totalApplications = applicationsList.length;
-  const approvedCount = applicationsList.filter(app => app.status === 'Approved').length;
-  const pendingCount = applicationsList.filter(app => app.status === 'Under Scrutiny').length;
-  const rejectedCount = applicationsList.filter(app => app.status === 'Rejected').length;
+  const eligibleCount = applicationsList.filter(app => app.status === 'Eligible').length;
+  const notEligibleCount = applicationsList.filter(app => app.status === 'Not Eligible').length;
   
-  const approvalRate = totalApplications > 0 ? Math.round((approvedCount / totalApplications) * 100) : 0;
+  const eligibilityRate = totalApplications > 0 ? Math.round((eligibleCount / totalApplications) * 100) : 0;
 
   // Loading state
   if (loading) {
@@ -132,39 +131,37 @@ const Applications = () => {
           )}
 
           {/* Page Header */}
-          <div className="mb-12 flex items-center justify-center">
-            <div className="text-center">
-              <div className="mb-6 flex items-center justify-center space-x-4">
-                <div className="relative max-w-3xl">
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-20"></div>
-                  <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl p-12 shadow-xl border border-white/50">
-                    <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent tracking-tight mb-4">
-                      Loan Applications
-                    </h1>
-                    <p className="text-gray-600 text-xl font-medium leading-relaxed">
-                      Monitor and manage loan applications with real-time status updates
-                    </p>
-                  </div>
+          <div className="mb-12 text-center">
+            <div className="mb-6 flex items-center justify-center space-x-4">
+              <div className="relative max-w-2xl">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-20"></div>
+                <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-white/50">
+                  <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent tracking-tight">
+                    Loan Applications
+                  </h1>
+                  <p className="mt-3 text-gray-600 text-lg font-medium">
+                    Monitor and manage loan applications with real-time status updates
+                  </p>
                 </div>
-                <button
-                  onClick={fetchApplications}
-                  disabled={updating}
-                  className="group relative overflow-hidden bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 text-white font-semibold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-                  title="Refresh data"
-                >
-                  <div className="absolute inset-0 bg-white/20 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-                  <div className="relative flex items-center space-x-2">
-                    <RefreshCw className={`w-6 h-6 ${updating ? 'animate-spin' : ''}`} />
-                    <span className="text-lg">Refresh</span>
-                  </div>
-                </button>
               </div>
-              <div className="h-1 w-40 bg-gradient-to-r from-purple-500 to-blue-600 rounded-full mx-auto shadow-lg"></div>
+              <button
+                onClick={fetchApplications}
+                disabled={updating}
+                className="group relative overflow-hidden bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Refresh data"
+              >
+                <div className="absolute inset-0 bg-white/20 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                <div className="relative flex items-center space-x-2">
+                  <RefreshCw className={`w-5 h-5 ${updating ? 'animate-spin' : ''}`} />
+                  <span>Refresh</span>
+                </div>
+              </button>
             </div>
+            <div className="h-1 w-32 bg-gradient-to-r from-purple-500 to-blue-600 rounded-full mx-auto shadow-lg"></div>
           </div>
 
           {/* Statistics Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
             <DashboardCard
               title="Total Applications"
               value={totalApplications.toLocaleString()}
@@ -173,22 +170,15 @@ const Applications = () => {
               trend={{ type: 'up', value: '+15.3%' }}
             />
             <DashboardCard
-              title="Approved"
-              value={approvedCount.toLocaleString()}
-              subtitle={`${approvalRate}% approval rate`}
+              title="Eligible"
+              value={eligibleCount.toLocaleString()}
+              subtitle={`${eligibilityRate}% eligibility rate`}
               color="#22c55e"
               trend={{ type: 'up', value: '+8.7%' }}
             />
             <DashboardCard
-              title="Pending Review"
-              value={pendingCount.toLocaleString()}
-              subtitle="awaiting decision"
-              color="#f59e0b"
-              trend={{ type: 'neutral', value: 'stable' }}
-            />
-            <DashboardCard
-              title="Rejected"
-              value={rejectedCount.toLocaleString()}
+              title="Not Eligible"
+              value={notEligibleCount.toLocaleString()}
               subtitle="applications declined"
               color="#ef4444"
               trend={{ type: 'down', value: '-3.2%' }}
