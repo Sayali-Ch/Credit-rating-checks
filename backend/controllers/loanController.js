@@ -29,9 +29,27 @@ exports.createLoan = async (req, res, next) => {
 exports.getLoansByCustomer = async (req, res, next) => {
   try {
     const { customerId } = req.params;
-    const loans = await Loan.find({ customerId }).sort({ appliedDate: -1 });
+    
+    console.log(`🔍 Fetching loans for customer: ${customerId}`);
+    
+    // Look for loans with both field names (customer_id and customerId) for compatibility
+    const loans = await Loan.find({ 
+      $or: [
+        { customer_id: customerId },
+        { customerId: customerId }
+      ]
+    }).sort({ applied_date: -1, appliedDate: -1 });
+    
+    console.log(`📋 Found ${loans.length} loans for customer ${customerId}`);
+    if (loans.length > 0) {
+      console.log('📄 Sample loan data:', loans[0]);
+    }
+    
     return res.json({ success: true, loans });
-  } catch (err) { next(err); }
+  } catch (err) { 
+    console.error('❌ Error fetching loans:', err);
+    next(err); 
+  }
 };
 
 // GET /api/customer-applications/my-applications  (compat)

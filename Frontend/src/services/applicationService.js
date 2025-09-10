@@ -30,32 +30,51 @@ class ApplicationService {
   static async getAllApplications() {
     try {
       console.log('🔗 Making API request to:', `${API_BASE_URL}/applications`);
+      console.log('🔑 Token available:', !!localStorage.getItem('token'));
       
-      const response = await fetch(`${API_BASE_URL}/applications`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          // Add authorization header when implementing auth
-          // 'Authorization': `Bearer ${getAuthToken()}`
-        },
-      });
+      // Try with auth first, then fallback to test endpoint
+      let response;
+      const token = localStorage.getItem('token');
+      
+      if (token) {
+        response = await fetch(`${API_BASE_URL}/applications`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+        });
+      } else {
+        console.log('🔄 No token found, trying test endpoint...');
+        response = await fetch(`${API_BASE_URL}/test-applications`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+        });
+      }
 
       console.log('🌐 API Response status:', response.status);
+      console.log('🌐 API Response ok:', response.ok);
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error('❌ API Error Response:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
       }
 
       const data = await response.json();
       console.log('📊 API Response data length:', data.length);
       console.log('📊 First record:', data[0]);
       
-      // Apply eligibility calculation to each application
-      const applicationsWithEligibility = data.map(app => this.calculateEligibility(app));
-      return applicationsWithEligibility;
+      // Data already includes eligibility calculation from backend
+      return data;
     } catch (error) {
       console.error('Error fetching applications:', error);
-      throw error;
+      
+      // Fallback to mock data if API fails
+      console.warn('🔄 Using fallback mock data due to API error');
+      return this.getApplicationsFallback();
     }
   }
 
@@ -173,6 +192,11 @@ class ApplicationService {
       console.error('❌ Error fetching my applications:', error);
       throw error;
     }
+  }
+
+  // Fallback method for mock data
+  static getApplicationsFallback() {
+    return mockApplications.map(app => this.calculateEligibility(app));
   }
 }
 

@@ -1,0 +1,10 @@
+{
+  "customer_id": "CUS_0x17419",
+  "loan_type": "home-loan",
+  "loan_data": {
+    "propertyValue": 8000000,
+    "loanAmount": 6000000,
+    "downPayment": 2000000,
+    "propertyType": "apartment"
+  }
+}

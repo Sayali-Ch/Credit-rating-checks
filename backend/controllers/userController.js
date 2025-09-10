@@ -355,4 +355,298 @@ exports.getCreditScoreDistribution = async (req, res, next) => {
   }
 };
 
+// GET /api/loan-applications - Fetch loan applications with eligibility calculation
+exports.getLoanApplications = async (req, res, next) => {
+  try {
+    console.log('🔍 GET /api/applications endpoint called');
+    
+    const Loan = require('../models/Loan');
+    
+    // Credit score requirements for each loan type
+    const creditRequirements = {
+      'home-loan': 700,
+      'car-loan': 650,
+      'personal-loan': 600,
+      'education-loan': 580,
+      'business-loan': 750
+    };
+
+    console.log('📋 Fetching loans from database...');
+    
+    // Fetch all loans
+    const loans = await Loan.find({}).sort({ applied_date: -1 });
+    
+    console.log(`📊 Found ${loans.length} loans in database`);
+    
+    if (loans.length === 0) {
+      console.log('⚠️ No loans found in database');
+      return res.json([]);
+    }
+    
+    // Fetch user details for each loan and calculate eligibility
+    const applications = await Promise.all(
+      loans.map(async (loan) => {
+        try {
+          // Get user details for this customer
+          const userDetails = await UserDetail.findOne({ customer_id: loan.customer_id });
+          
+          if (!userDetails) {
+            console.warn(`No user details found for customer_id: ${loan.customer_id}`);
+            return null;
+          }
+
+          // Get required credit score for this loan type
+          const requiredScore = creditRequirements[loan.loan_type] || 650;
+          
+          // Calculate eligibility
+          const isEligible = userDetails.credit_score >= requiredScore;
+          
+          return {
+            _id: loan._id,
+            customerId: loan.customer_id,
+            name: userDetails.name,
+            email: userDetails.email,
+            phone: userDetails.phone,
+            address: userDetails.address,
+            occupation: userDetails.occupation,
+            annualIncome: userDetails.annual_income,
+            creditScore: userDetails.credit_score,
+            creditCategory: userDetails.credit_category,
+            lendingOutlook: userDetails.lending_outlook,
+            loanType: loan.loan_type,
+            loanData: loan.loan_data,
+            requiredScore: requiredScore,
+            status: isEligible ? 'Eligible' : 'Not Eligible',
+            submittedAt: loan.applied_date,
+            assignedTo: userDetails.reviewed_by || 'Auto-System'
+          };
+        } catch (error) {
+          console.error(`Error processing loan ${loan._id}:`, error);
+          return null;
+        }
+      })
+    );
+
+    // Filter out null results
+    const validApplications = applications.filter(app => app !== null);
+    
+    console.log(`📊 Fetched ${validApplications.length} loan applications with eligibility`);
+    
+    return res.json(validApplications);
+  } catch (err) {
+    console.error('Error fetching loan applications:', err);
+    next(err);
+  }
+};
+
+// GET /api/users/:customerId - Get user profile by customer ID
+exports.getUserByCustomerId = async (req, res, next) => {
+  try {
+    const { customerId } = req.params;
+    
+    console.log(`🔍 Fetching user profile for customer ID: ${customerId}`);
+    
+    // Find user in user_details collection
+    const userDetail = await UserDetail.findOne({ customer_id: customerId });
+    
+    if (!userDetail) {
+      console.log(`❌ User not found with customer ID: ${customerId}`);
+      return res.status(404).json({ 
+        message: 'User not found',
+        customerId: customerId
+      });
+    }
+    
+    console.log(`✅ Found user: ${userDetail.name} (${userDetail.customer_id})`);
+    console.log(`📊 User data:`, {
+      name: userDetail.name,
+      email: userDetail.email,
+      credit_score: userDetail.credit_score,
+      annual_income: userDetail.annual_income,
+      pan_card_number: userDetail.customer_id,
+      phone: userDetail.phone,
+      address: userDetail.address,
+      occupation: userDetail.occupation
+    });
+    
+    return res.json(userDetail);
+  } catch (err) {
+    console.error('Error fetching user by customer ID:', err);
+    next(err);
+  }
+};
+
+// POST /api/loans/apply - Submit a new loan application
+exports.submitLoanApplication = async (req, res, next) => {
+  try {
+    console.log('🚀 === LOAN APPLICATION ENDPOINT CALLED ===');
+    console.log('Request body:', req.body);
+    console.log('Request headers:', req.headers);
+    
+    const Loan = require('../models/Loan');
+    const { customer_id, loan_type, loan_data } = req.body;
+    
+    console.log(`📝 New loan application submission:`);
+    console.log(`👤 Customer ID: ${customer_id}`);
+    console.log(`🏦 Loan Type: ${loan_type}`);
+    console.log(`📊 Loan Data:`, loan_data);
+    
+    // Validate required fields
+    if (!customer_id || !loan_type) {
+      console.log('❌ Validation failed: Missing required fields');
+      return res.status(400).json({
+        message: 'Customer ID and loan type are required',
+        required: ['customer_id', 'loan_type']
+      });
+    }
+    
+    // Validate customer exists
+    console.log('🔍 Checking if customer exists...');
+    const userDetails = await UserDetail.findOne({ customer_id });
+    if (!userDetails) {
+      console.log(`❌ Customer not found: ${customer_id}`);
+      return res.status(404).json({
+        message: 'Customer not found',
+        customer_id
+      });
+    }
+    
+    console.log(`✅ Customer found: ${userDetails.name}`);
+    
+    // Validate loan type and required parameters
+    console.log('🔍 Validating loan data...');
+    const loanTypeValidation = validateLoanTypeAndData(loan_type, loan_data);
+    if (!loanTypeValidation.valid) {
+      console.log('❌ Loan data validation failed:', loanTypeValidation.errors);
+      return res.status(400).json({
+        message: 'Invalid loan data',
+        errors: loanTypeValidation.errors,
+        requiredFields: loanTypeValidation.requiredFields
+      });
+    }
+    
+    console.log('✅ Loan data validation passed');
+    
+    // Create new loan application
+    console.log('💾 Creating new loan document...');
+    const newLoan = new Loan({
+      customer_id,
+      loan_type,
+      loan_data: loan_data || {},
+      applied_date: new Date(),
+      status: 'Applied'
+    });
+    
+    // Save to database
+    console.log('💾 Saving to database...');
+    const savedLoan = await newLoan.save();
+    
+    console.log(`✅ Loan application saved with ID: ${savedLoan._id}`);
+    console.log('📄 Saved loan document:', savedLoan);
+    
+    // Calculate eligibility
+    const creditRequirements = {
+      'home-loan': 700,
+      'car-loan': 650,
+      'personal-loan': 600,
+      'education-loan': 580,
+      'business-loan': 750
+    };
+    
+    const requiredScore = creditRequirements[loan_type] || 650;
+    const isEligible = userDetails.credit_score >= requiredScore;
+    
+    // Return complete application with eligibility
+    const response = {
+      _id: savedLoan._id,
+      customer_id: savedLoan.customer_id,
+      loan_type: savedLoan.loan_type,
+      loan_data: savedLoan.loan_data,
+      applied_date: savedLoan.applied_date,
+      status: savedLoan.status,
+      applicant: {
+        name: userDetails.name,
+        credit_score: userDetails.credit_score,
+        email: userDetails.email
+      },
+      eligibility: {
+        eligible: isEligible,
+        required_score: requiredScore,
+        current_score: userDetails.credit_score,
+        status: isEligible ? 'Eligible' : 'Not Eligible'
+      }
+    };
+    
+    console.log('📤 Sending response:', response);
+    
+    return res.status(201).json({
+      message: 'Loan application submitted successfully',
+      application: response
+    });
+    
+  } catch (err) {
+    console.error('❌ Error submitting loan application:', err);
+    next(err);
+  }
+};
+
+// Helper function to validate loan type and required data
+function validateLoanTypeAndData(loan_type, loan_data) {
+  const validLoanTypes = ['home-loan', 'car-loan', 'personal-loan', 'education-loan', 'business-loan'];
+  
+  if (!validLoanTypes.includes(loan_type)) {
+    return {
+      valid: false,
+      errors: [`Invalid loan type: ${loan_type}`],
+      requiredFields: null
+    };
+  }
+  
+  // Define required fields for each loan type
+  const requiredFields = {
+    'home-loan': ['propertyValue', 'loanAmount', 'downPayment', 'propertyType'],
+    'car-loan': ['vehicleType', 'vehicleValue', 'loanAmount', 'downPayment'],
+    'personal-loan': ['loanPurpose', 'monthlyIncome', 'loanAmount'],
+    'education-loan': ['admissionStatus', 'courseType', 'courseDuration', 'feeStructure', 'coApplicant'],
+    'business-loan': ['businessType', 'gstRegistered', 'monthlyRevenue', 'loanAmount', 'businessAge']
+  };
+  
+  const required = requiredFields[loan_type];
+  const errors = [];
+  
+  if (!loan_data || typeof loan_data !== 'object') {
+    return {
+      valid: false,
+      errors: ['Loan data is required and must be an object'],
+      requiredFields: required
+    };
+  }
+  
+  // Check for missing required fields
+  required.forEach(field => {
+    if (!loan_data.hasOwnProperty(field) || loan_data[field] === null || loan_data[field] === undefined || loan_data[field] === '') {
+      errors.push(`Missing required field: ${field}`);
+    }
+  });
+  
+  // Additional validations based on loan type
+  if (loan_type === 'home-loan') {
+    if (loan_data.loanAmount && loan_data.propertyValue && loan_data.loanAmount > loan_data.propertyValue) {
+      errors.push('Loan amount cannot exceed property value');
+    }
+  }
+  
+  if (loan_type === 'car-loan') {
+    if (loan_data.loanAmount && loan_data.vehicleValue && loan_data.loanAmount > loan_data.vehicleValue) {
+      errors.push('Loan amount cannot exceed vehicle value');
+    }
+  }
+  
+  return {
+    valid: errors.length === 0,
+    errors,
+    requiredFields: required
+  };
+}
+
 

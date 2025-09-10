@@ -19,18 +19,33 @@ const UserProfile = () => {
         setLoading(true);
         setError(null);
         
+        console.log(`🔍 Fetching user profile for ID: ${userId}`);
+        
         // Try to fetch from API first, using the URL parameter as customerId
         let userData;
         try {
           userData = await UserProfileService.getUserProfile(userId);
+          console.log('✅ API response successful');
+          console.log('📊 Raw API data:', userData);
+          console.log('📊 Data fields:', {
+            name: userData.name,
+            email: userData.email,
+            credit_score: userData.credit_score,
+            annual_income: userData.annual_income,
+            pan_card_number: userData.customer_id,
+            phone: userData.phone,
+            address: userData.address,
+            occupation: userData.occupation
+          });
         } catch (apiError) {
           // Fallback to mock data during development
           console.warn('API not available, using mock data:', apiError.message);
           userData = getUserProfileFallback(userId);
+          console.log('📝 Fallback data:', userData);
         }
         
         if (!userData) {
-          throw new Error('User not found');
+          throw new Error(`User not found with ID: ${userId}`);
         }
         
         setUser(userData);
@@ -227,14 +242,16 @@ const UserProfile = () => {
                   <div>
                     <label className="text-sm font-medium text-gray-700">PAN Card Number</label>
                     <div className="mt-1 p-3 bg-gray-50 rounded-lg border">
-                      <span className="text-gray-900 font-mono">{user.panCardNumber || user.pancardNumber || 'Not Available'}</span>
+                      <span className="text-gray-900 font-mono">{user.customer_id || user.customer_id || user.customer_id || 'Not Available'}</span>
                     </div>
                   </div>
                   
                   <div>
                     <label className="text-sm font-medium text-gray-700">Annual Income</label>
                     <div className="mt-1 p-3 bg-gray-50 rounded-lg border">
-                      <span className="text-gray-900 font-semibold text-green-600">{user.annualIncome}</span>
+                      <span className="text-gray-900 font-semibold text-green-600">
+                        {user.annualIncome || user.annual_income || 'Not Available'}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -242,11 +259,11 @@ const UserProfile = () => {
             </Card>
           </div>
 
-          {/* Account Settings */}
-          <Card className="mt-8 shadow-lg border-0 bg-gradient-to-br from-white to-gray-50/50">
-            <CardHeader className="pb-6">
+          {/* Credit Score Section - Enhanced */}
+          <Card className="mt-8 shadow-xl border-0 bg-gradient-to-br from-white via-purple-50/30 to-indigo-50/20 overflow-hidden">
+            <CardHeader className="pb-6 bg-gradient-to-r from-purple-600/5 to-indigo-600/5">
               <div className="flex items-center space-x-3">
-                <div className="h-1 w-12 rounded-full bg-purple-600"></div>
+                <div className="h-1 w-12 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600"></div>
                 <div>
                   <CardTitle className="text-xl font-bold text-gray-900 flex items-center">
                     <Settings className="w-5 h-5 mr-2 text-purple-600" />
@@ -257,26 +274,68 @@ const UserProfile = () => {
               </div>
             </CardHeader>
             <CardContent>
-              {/* Credit Score Section */}
-              <div className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-2xl font-bold text-gray-900">Current Score</h3>
-                    <p className="text-sm text-gray-600">Based on customer's financial history</p>
+              {/* Enhanced Credit Score Display */}
+              <div className="p-8 bg-gradient-to-r from-purple-50 via-indigo-50 to-blue-50 rounded-xl border border-purple-200/50 shadow-inner">
+                <div className="text-center mb-6">
+                  <h3 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent mb-2">
+                    Current Score
+                  </h3>
+                  <p className="text-sm text-gray-600 font-medium">Based on customer's financial history</p>
+                </div>
+                
+                <div className="flex items-center justify-center mb-6">
+                  <div className="relative">
+                    <div className="text-6xl font-black bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 bg-clip-text text-transparent">
+                      {user.creditScore || user.credit_score || 'Loading...'}
+                    </div>
+                    <div className="absolute -top-2 -right-8 text-lg text-gray-500 font-medium">
+                      out of 900
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-4xl font-bold text-blue-600">{user.creditScore}</div>
-                    <div className="flex items-center space-x-3 mt-2">
-                      <div className="w-32 h-3 bg-gray-200 rounded-full overflow-hidden">
-                        <div 
-                          className={`h-full rounded-full ${
-                            user.creditScore >= 750 ? 'bg-green-500' :
-                            user.creditScore >= 650 ? 'bg-yellow-500' : 'bg-red-500'
-                          }`}
-                          style={{ width: `${Math.min((user.creditScore / 900) * 100, 100)}%` }}
-                        ></div>
-                      </div>
-                      <span className="text-sm text-gray-500 font-medium">out of 900</span>
+                </div>
+                
+                <div className="mb-4">
+                  <div className="flex justify-between text-sm text-gray-600 mb-2">
+                    <span>300</span>
+                    <span className="font-semibold text-gray-700">Credit Score Range</span>
+                    <span>900</span>
+                  </div>
+                  <div className="w-full h-4 bg-gray-200 rounded-full overflow-hidden shadow-inner">
+                    <div 
+                      className={`h-full rounded-full transition-all duration-1000 ${
+                        (user.creditScore || user.credit_score) >= 750 ? 'bg-gradient-to-r from-green-400 to-green-600' :
+                        (user.creditScore || user.credit_score) >= 650 ? 'bg-gradient-to-r from-yellow-400 to-orange-500' : 
+                        'bg-gradient-to-r from-red-400 to-red-600'
+                      }`}
+                      style={{ width: `${Math.min((((user.creditScore || user.credit_score || 0) - 300) / 600) * 100, 100)}%` }}
+                    ></div>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-3 gap-4 mt-6">
+                  <div className="text-center p-3 bg-white/70 rounded-lg border border-gray-200/50">
+                    <div className="text-xs font-bold text-gray-600 uppercase tracking-wider mb-1">Category</div>
+                    <div className={`text-sm font-bold ${
+                      (user.creditScore || user.credit_score) >= 750 ? 'text-green-600' :
+                      (user.creditScore || user.credit_score) >= 650 ? 'text-yellow-600' : 'text-red-600'
+                    }`}>
+                      {(user.creditScore || user.credit_score) >= 750 ? 'Excellent' :
+                       (user.creditScore || user.credit_score) >= 650 ? 'Good' : 'Fair'}
+                    </div>
+                  </div>
+                  <div className="text-center p-3 bg-white/70 rounded-lg border border-gray-200/50">
+                    <div className="text-xs font-bold text-gray-600 uppercase tracking-wider mb-1">Status</div>
+                    <div className={`text-sm font-bold ${
+                      (user.creditScore || user.credit_score) >= 650 ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      {(user.creditScore || user.credit_score) >= 650 ? 'Loan Eligible' : 'Limited Options'}
+                    </div>
+                  </div>
+                  <div className="text-center p-3 bg-white/70 rounded-lg border border-gray-200/50">
+                    <div className="text-xs font-bold text-gray-600 uppercase tracking-wider mb-1">Percentile</div>
+                    <div className="text-sm font-bold text-blue-600">
+                      {(user.creditScore || user.credit_score) ? 
+                        Math.round((((user.creditScore || user.credit_score) - 300) / 600) * 100) : 0}%
                     </div>
                   </div>
                 </div>
@@ -304,56 +363,111 @@ const UserProfile = () => {
                 </div>
               </CardHeader>
               <CardContent className="space-y-6">
-                {loanApplications.map((loan, index) => (
-                  <div key={loan._id || index} className="p-6 bg-gradient-to-r from-gray-50 to-green-50/50 rounded-xl border border-gray-200/50 shadow-sm">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h3 className="text-lg font-bold text-gray-900">{loan.loanType}</h3>
-                        <p className="text-sm text-gray-600">Applied on: {new Date(loan.appliedDate).toLocaleDateString()}</p>
-                      </div>
-                      <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-                        loan.status === 'Eligible' ? 'bg-green-100 text-green-800' :
-                        loan.status === 'Non-eligible' ? 'bg-red-100 text-red-800' :
-                        'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {loan.status}
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                      <div>
-                        <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Credit Score</label>
-                        <div className="text-lg font-semibold text-gray-900">{loan.creditScore}</div>
-                      </div>
-                      <div>
-                        <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Application ID</label>
-                        <div className="text-sm font-mono text-gray-700">{loan._id}</div>
-                      </div>
-                    </div>
-
-                    {/* Loan Parameters */}
-                    {loan.loanParameters && (
-                      <div className="mt-4 p-4 bg-white/60 rounded-lg border border-gray-200/50">
-                        <h4 className="text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">Loan Parameters</h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          {Object.entries(loan.loanParameters).map(([key, value]) => (
-                            <div key={key} className="flex justify-between">
-                              <span className="text-sm text-gray-600 capitalize">
-                                {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}:
-                              </span>
-                              <span className="text-sm font-medium text-gray-900">
-                                {typeof value === 'number' && key.includes('income') || key.includes('debt') || key.includes('price') || key.includes('amount') 
-                                  ? `₹${value.toLocaleString()}` 
-                                  : value
-                                }
-                              </span>
-                            </div>
-                          ))}
+                {loanApplications.map((loan, index) => {
+                  // Calculate loan amount from loan data
+                  const loanAmount = loan.loan_data?.loanAmount || 
+                                   loan.loan_data?.loanAmount || 
+                                   loan.loanParameters?.loanAmount || 
+                                   'Not specified';
+                  
+                  // Determine eligibility based on credit score and loan type
+                  const creditRequirements = {
+                    'home-loan': 700,
+                    'Home Loan': 700,
+                    'car-loan': 650,
+                    'Car Loan': 650,
+                    'personal-loan': 600,
+                    'Personal Loan': 600,
+                    'education-loan': 580,
+                    'Education Loan': 580,
+                    'business-loan': 750,
+                    'Business Loan': 750
+                  };
+                  
+                  const requiredScore = creditRequirements[loan.loanType] || creditRequirements[loan.loan_type] || 650;
+                  const currentScore = loan.creditScore || loan.credit_score || user.creditScore || user.credit_score || 0;
+                  const isEligible = currentScore >= requiredScore;
+                  const eligibilityStatus = isEligible ? 'Eligible' : 'Not Eligible';
+                  
+                  return (
+                    <div key={loan._id || index} className="p-6 bg-gradient-to-r from-gray-50 to-green-50/50 rounded-xl border border-gray-200/50 shadow-sm hover:shadow-md transition-all duration-200">
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <h3 className="text-lg font-bold text-gray-900">{loan.loanType || loan.loan_type}</h3>
+                          <p className="text-sm text-gray-600">Applied on: {new Date(loan.appliedDate || loan.applied_date).toLocaleDateString()}</p>
+                        </div>
+                        <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+                          eligibilityStatus === 'Eligible' ? 'bg-green-100 text-green-800 border border-green-200' :
+                          'bg-red-100 text-red-800 border border-red-200'
+                        }`}>
+                          {eligibilityStatus}
                         </div>
                       </div>
-                    )}
-                  </div>
-                ))}
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div className="bg-white/80 p-3 rounded-lg border border-gray-200/50">
+                          <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Credit Score</label>
+                          <div className="text-lg font-semibold text-blue-600">{currentScore || 'N/A'}</div>
+                          <div className="text-xs text-gray-500">Required: {requiredScore}</div>
+                        </div>
+                        <div className="bg-white/80 p-3 rounded-lg border border-gray-200/50">
+                          <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Loan Amount</label>
+                          <div className="text-lg font-semibold text-green-600">
+                            {typeof loanAmount === 'number' ? `₹${loanAmount.toLocaleString()}` : loanAmount}
+                          </div>
+                        </div>
+                        <div className="bg-white/80 p-3 rounded-lg border border-gray-200/50">
+                          <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Application ID</label>
+                          <div className="text-sm font-mono text-gray-700">{loan._id || 'N/A'}</div>
+                        </div>
+                      </div>
+
+                      {/* Eligibility Details */}
+                      <div className="mb-4 p-4 bg-white/60 rounded-lg border border-gray-200/50">
+                        <h4 className="text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">Eligibility Assessment</h4>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className={`w-3 h-3 rounded-full ${isEligible ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                            <span className="text-sm font-medium text-gray-700">
+                              Credit Score: {currentScore || 'N/A'} / {requiredScore} required
+                            </span>
+                          </div>
+                          <div className={`text-sm font-bold ${isEligible ? 'text-green-600' : 'text-red-600'}`}>
+                            {isEligible ? '✓ Meets Requirements' : '✗ Below Requirements'}
+                          </div>
+                        </div>
+                        <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className={`h-2 rounded-full ${isEligible ? 'bg-green-500' : 'bg-red-500'}`}
+                            style={{ width: `${currentScore ? Math.min((currentScore / requiredScore) * 100, 100) : 0}%` }}
+                          ></div>
+                        </div>
+                      </div>
+
+                      {/* Loan Parameters */}
+                      {(loan.loanParameters || loan.loanData || loan.loan_data) && (
+                        <div className="mt-4 p-4 bg-white/60 rounded-lg border border-gray-200/50">
+                          <h4 className="text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">Loan Details</h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {Object.entries(loan.loanParameters || loan.loanData || loan.loan_data || {}).map(([key, value]) => (
+                              <div key={key} className="flex justify-between">
+                                <span className="text-sm text-gray-600 capitalize">
+                                  {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()).replace(/_/g, ' ')}:
+                                </span>
+                                <span className="text-sm font-medium text-gray-900">
+                                  {typeof value === 'number' && (key.includes('income') || key.includes('debt') || key.includes('price') || key.includes('amount') || key.includes('value') || key.includes('payment'))
+                                    ? `₹${value.toLocaleString()}` 
+                                    : value
+                                  }
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </CardContent>
             </Card>
           </div>

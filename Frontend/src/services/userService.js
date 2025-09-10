@@ -10,9 +10,7 @@ class UserProfileService {
       const response = await fetch(`${API_BASE_URL}/users/${customerId}`, {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
-          // Add authorization header when implementing auth
-          // 'Authorization': `Bearer ${getAuthToken()}`
+          'Content-Type': 'application/json'
         },
       });
 
@@ -99,55 +97,55 @@ class UserProfileService {
 }
 
 // Mock data fallback (for development without backend)
-// This will be removed when you connect to MongoDB
+// Updated to match real database customer IDs
 const mockUserProfiles = [
   {
-    customerId: "1",
-    name: "Alice Williams",
-    email: "alice.williams@email.com",
+    customerId: "CUS_0x17419",
+    name: "Nancy Miller",
+    email: "nancy.miller@email.com",
     phone: "+1 (555) 123-4567",
     address: "123 Main St, Anytown, ST 12345",
     occupation: "Software Engineer",
     pancardNumber: "BXER4568VD",
     annualIncome: "$95,000",
-    creditScore: 720
+    creditScore: 797
   },
   {
-    customerId: "2",
-    name: "Liam Smith",
-    email: "liam.smith@email.com",
+    customerId: "CUS_0x18fc6",
+    name: "Jennifer Harris",
+    email: "jennifer.harris@email.com",
     phone: "+1 (555) 234-5678",
     address: "456 Oak Ave, Somewhere, ST 23456",
     occupation: "Marketing Manager",
     pancardNumber: "CXER5679WE",
-    annualIncome: "$72,000",
-    creditScore: 640
+    annualIncome: "$95,000",
+    creditScore: 799
   },
   {
-    customerId: "3",
-    name: "Emma Johnson",
-    email: "emma.johnson@email.com",
+    customerId: "CUS_0x1b3d1",
+    name: "Michael Thompson",
+    email: "michael.thompson@email.com",
     phone: "+1 (555) 345-6789",
     address: "789 Pine Rd, Elsewhere, ST 34567",
     occupation: "Data Analyst",
     pancardNumber: "DXER6780XF",
-    annualIncome: "$68,000",
-    creditScore: 690
+    annualIncome: "$75,000",
+    creditScore: 779
   },
   {
-    customerId: "4",
-    name: "Noah Brown",
-    email: "noah.brown@email.com",
+    customerId: "CUS_0x1d803",
+    name: "Jason Thompson",
+    email: "jason.thompson@email.com",
     phone: "+1 (555) 456-7890",
     address: "321 Elm St, Nowhere, ST 45678",
     occupation: "Teacher",
     pancardNumber: "EXER7891YG",
-    annualIncome: "$45,000",
-    creditScore: 560
+    annualIncome: "$60,000",
+    creditScore: 725
   },
   {
-    customerId: "5",
-    name: "Olivia Davis",
+    customerId: "CUS_0x1e2f4",
+    name: "Sarah Davis",
     email: "olivia.davis@email.com",
     phone: "+1 (555) 567-8901",
     address: "654 Maple Dr, Anywhere, ST 56789",
